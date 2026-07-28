@@ -226,7 +226,7 @@ export default function ClimateDashboard() {
       : [...previous, scenario]);
   };
 
-  const yTitle = variable === "tas" ? "Changes compared with the past (°C)" : "Changes compared with the past";
+  const yTitle = variable === "tas" ? "Changes compared with the past (°C)" : "Changes compared with the past (%)";
   const variableTitle = variable === "tas" ? "Mean temperature" : "Precipitation";
 
   return (

@@ -42,8 +42,12 @@ select:focus, input:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rg
 .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .check { display: flex; align-items: center; gap: 8px; padding: 9px 10px; background: #f7f9f9; border-radius: 10px; font-size: 13px; }
 .map-card { margin-top: 18px; overflow: hidden; border: 1px solid var(--line); border-radius: 14px; background: #f6f8f8; }
-.map-card img { display: block; width: 100%; height: auto; }
 .map-caption { padding: 9px 11px; color: var(--muted); font-size: 11px; }
+.eco-map { height: 320px; width: 100%; }
+.eco-map-canvas { height: 100%; width: 100%; background: #e7eef0; }
+.map-fallback { display: grid; place-items: center; min-height: 320px; padding: 18px; color: var(--muted); font-size: 13px; text-align: center; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { border: 0; border-radius: 8px; box-shadow: 0 8px 24px rgba(20, 45, 50, .16); padding: 6px 8px; font-size: 11px; font-weight: 650; }
 
 .content { min-width: 0; display: flex; flex-direction: column; }
 .chart-panel { overflow: hidden; flex: 1; display: flex; flex-direction: column; }

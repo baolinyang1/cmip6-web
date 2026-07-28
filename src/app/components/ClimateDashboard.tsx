@@ -5,6 +5,10 @@ import Papa from "papaparse";
 import { useEffect, useMemo, useState } from "react";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
+const EcoRegionMap = dynamic(() => import("./EcoRegionMap"), {
+  ssr: false,
+  loading: () => <div className="map-fallback">Loading interactive ecoregion map…</div>
+});
 
 type CsvRow = Record<string, string | number | null | undefined>;
 type Variable = "tas" | "pr";
@@ -275,9 +279,8 @@ export default function ClimateDashboard() {
           </div>
 
           <div className="map-card">
-            {/* A normal img is intentional because this is a user-supplied static reference image. */}
-            <img src="/data/NA_LEVEL_III.jpg" alt="North American Level III ecoregion reference map" onError={(event) => { event.currentTarget.style.display = "none"; }} />
-            <div className="map-caption">SNorth America Level III Ecoregions</div>
+            <EcoRegionMap selectedCode={selectedEco} onSelect={setSelectedEco} />
+            <div className="map-caption">Click a Level III ecoregion on the map to select it</div>
           </div>
         </aside>
 

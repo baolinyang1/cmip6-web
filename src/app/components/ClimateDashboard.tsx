@@ -101,7 +101,6 @@ export default function ClimateDashboard() {
   const [enabledScenarios, setEnabledScenarios] = useState<string[]>([...SCENARIOS]);
   const [ecoregions, setEcoregions] = useState<EcoRegion[]>([]);
   const [data, setData] = useState<Record<Variable, CsvRow[]>>({ tas: [], pr: [] });
-  const [sourceNames, setSourceNames] = useState<Record<Variable, string>>({ tas: "", pr: "" });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -124,7 +123,6 @@ export default function ClimateDashboard() {
         setEcoregions(ecoRows);
         setSelectedEco(ecoRows[0]?.code ?? "");
         setData({ tas: tasResult.rows, pr: prResult.rows });
-        setSourceNames({ tas: tasResult.url, pr: prResult.url });
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {
@@ -218,11 +216,6 @@ export default function ClimateDashboard() {
     return output;
   }, [currentRows, selectedEco, ecoHeader, termHeader, scenarioHeader, modelHeader, metricHeader, enabledScenarios]);
 
-  const regionRows = useMemo(() => {
-    if (!ecoHeader) return [];
-    return currentRows.filter((row) => normalize(row[ecoHeader]) === selectedEco);
-  }, [currentRows, ecoHeader, selectedEco]);
-
   const toggleScenario = (scenario: string) => {
     setEnabledScenarios((previous) => previous.includes(scenario)
       ? previous.filter((item) => item !== scenario)
@@ -284,7 +277,7 @@ export default function ClimateDashboard() {
           <div className="map-card">
             {/* A normal img is intentional because this is a user-supplied static reference image. */}
             <img src="/data/NA_LEVEL_III.jpg" alt="North American Level III ecoregion reference map" onError={(event) => { event.currentTarget.style.display = "none"; }} />
-            <div className="map-caption">Static Level III reference map. Put <code>NA_LEVEL_III.jpg</code> in <code>public/data</code>.</div>
+            <div className="map-caption">SNorth America Level III Ecoregions</div>
           </div>
         </aside>
 
@@ -295,7 +288,6 @@ export default function ClimateDashboard() {
                 <h2>{season[0].toUpperCase() + season.slice(1)} {variableTitle} change</h2>
                 <p>{selectedEco}{selectedRegion ? ` · ${selectedRegion.level1} · ${selectedRegion.level2} · ${selectedRegion.level3}` : ""}</p>
               </div>
-              <span className="badge">{sourceNames[variable] || "CSV"}</span>
             </div>
 
             {loading ? <div className="status">Loading climate CSV files…</div> : null}
@@ -314,9 +306,10 @@ export default function ClimateDashboard() {
                     hovermode: "closest",
                     violinmode: "overlay",
                     xaxis: {
-                      title: { text: "25-year span" },
+                      title: { text: "25-year span", font: { size: 35 } },
                       tickmode: "array", tickvals: X_POSITIONS, ticktext: X_LABELS,
-                      tickangle: -38, range: [-1.2, 22.2], fixedrange: false,
+                      tickangle: -48, range: [-1.2, 22.2], fixedrange: false,
+                      tickfont: { size: 12 },
                       gridcolor: "rgba(105,125,130,.13)", zeroline: false
                     },
                     yaxis: {
@@ -327,22 +320,11 @@ export default function ClimateDashboard() {
                     legend: { orientation: "h", x: .5, xanchor: "center", y: -0.3, yanchor: "top" }
                   }}
                   config={{ responsive: true, displaylogo: false, toImageButtonOptions: { format: "png", filename: `cmip6_${selectedEco}_${variable}_${season}` } }}
-                  style={{ width: "100%", height: "620px" }}
+                  style={{ width: "100%", height: "100%" }}
                   useResizeHandler
                 />
               </div>
             ) : null}
-          </section>
-
-          <section className="stats">
-            <div className="panel stat"><span>Selected ecoregion</span><strong>{selectedEco || "—"}</strong></div>
-            <div className="panel stat"><span>Rows for region</span><strong>{regionRows.length.toLocaleString()}</strong></div>
-            <div className="panel stat"><span>Detected GCM field</span><strong>{modelHeader ?? "Not found"}</strong></div>
-            <div className="panel stat"><span>Metric field</span><strong style={{ fontSize: 13 }}>{metricHeader ?? "Not found"}</strong></div>
-          </section>
-
-          <section className="panel help">
-            <strong>Expected files:</strong> <code>EcoRegionCode.csv</code>, one of <code>Ave25yearSpan_tas.csv</code> or <code>EcoregionAve25yearSpan_tas.csv</code>, one of <code>Ave25yearSpan_pr.csv</code> or <code>EcoregionAve25yearSpan_pr.csv</code>, and <code>NA_LEVEL_III.jpg</code>. All belong in <code>public/data/</code>.
           </section>
         </div>
       </section>

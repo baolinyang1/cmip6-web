@@ -24,7 +24,7 @@ body {
 button, select, input { font: inherit; }
 
 .shell {
-  width: min(1500px, 96vw);
+  width: min(1900px, 96vw);
   height: 100dvh;
   max-height: 100dvh;
   margin: 0 auto;

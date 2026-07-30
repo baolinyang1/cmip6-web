@@ -6,6 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
+export type MapViewState = {
+  center: [number, number];
+  zoom: number;
+};
+
 type EcoFeatureProps = {
   code: string;
   name: string;
@@ -43,21 +48,36 @@ function pathStyle(code: string, selectedCode: string): L.PathOptions {
     color: selected ? "#0d6670" : "rgba(35, 55, 62, 0.55)",
     weight: selected ? 2.4 : 0.55,
     opacity: 1,
-    fillOpacity: selected ? 0.88 : 0.42
+    fillOpacity: selected ? 0.82 : 0.38
   };
 }
 
 function FocusSelected({
   data,
-  selectedCode
+  selectedCode,
+  enabled
 }: {
   data: FeatureCollection<Geometry, EcoFeatureProps> | null;
   selectedCode: string;
+  enabled: boolean;
 }) {
   const map = useMap();
+  // Seed with the current selection so remounts / overlay toggles do not auto-zoom.
+  const previousCodeRef = useRef<string | null>(selectedCode);
 
   useEffect(() => {
     if (!data || !selectedCode) return;
+
+    // Keep the current view when ecoregions are toggled on/off.
+    // Only zoom when the selected region changes while the overlay is visible.
+    if (!enabled) {
+      previousCodeRef.current = selectedCode;
+      return;
+    }
+
+    if (previousCodeRef.current === selectedCode) return;
+    previousCodeRef.current = selectedCode;
+
     const matches = data.features.filter((feature) => feature.properties?.code === selectedCode);
     if (!matches.length) return;
     const collection: FeatureCollection<Geometry, EcoFeatureProps> = {
@@ -69,7 +89,7 @@ function FocusSelected({
     if (bounds.isValid()) {
       map.fitBounds(bounds, { padding: [18, 18], maxZoom: 6, animate: true });
     }
-  }, [data, selectedCode, map]);
+  }, [data, selectedCode, enabled, map]);
 
   return null;
 }
@@ -88,12 +108,68 @@ function MapResizeFix() {
   return null;
 }
 
+function ViewPersistence({
+  view,
+  onViewChange
+}: {
+  view: MapViewState;
+  onViewChange: (view: MapViewState) => void;
+}) {
+  const map = useMap();
+  const onViewChangeRef = useRef(onViewChange);
+  onViewChangeRef.current = onViewChange;
+  const applyingRef = useRef(false);
+
+  useEffect(() => {
+    const center = map.getCenter();
+    const zoom = map.getZoom();
+    const samePlace =
+      Math.abs(center.lat - view.center[0]) < 1e-6 &&
+      Math.abs(center.lng - view.center[1]) < 1e-6 &&
+      zoom === view.zoom;
+    if (samePlace) return;
+
+    applyingRef.current = true;
+    map.setView(view.center, view.zoom, { animate: false });
+    applyingRef.current = false;
+  }, [map, view.center, view.zoom]);
+
+  useEffect(() => {
+    const save = () => {
+      if (applyingRef.current) return;
+      const center = map.getCenter();
+      onViewChangeRef.current({
+        center: [center.lat, center.lng],
+        zoom: map.getZoom()
+      });
+    };
+    map.on("moveend", save);
+    map.on("zoomend", save);
+    return () => {
+      map.off("moveend", save);
+      map.off("zoomend", save);
+    };
+  }, [map]);
+
+  return null;
+}
+
 export default function EcoRegionMap({
   selectedCode,
-  onSelect
+  onSelect,
+  showEcoregions,
+  onShowEcoregionsChange,
+  view,
+  onViewChange,
+  compact = false
 }: {
   selectedCode: string;
   onSelect: (code: string) => void;
+  showEcoregions: boolean;
+  onShowEcoregionsChange: (show: boolean) => void;
+  view: MapViewState;
+  onViewChange: (view: MapViewState) => void;
+  compact?: boolean;
 }) {
   const [data, setData] = useState<FeatureCollection<Geometry, EcoFeatureProps> | null>(null);
   const [loadError, setLoadError] = useState("");
@@ -122,6 +198,7 @@ export default function EcoRegionMap({
   }, []);
 
   useEffect(() => {
+    if (!showEcoregions) return;
     const layer = geoJsonRef.current;
     if (!layer) return;
     layer.eachLayer((path) => {
@@ -131,60 +208,72 @@ export default function EcoRegionMap({
       (path as L.Path).setStyle(pathStyle(code, selectedCode));
       if (code === selectedCode) (path as L.Path).bringToFront();
     });
-  }, [selectedCode, data]);
+  }, [selectedCode, data, showEcoregions]);
 
   if (loadError) {
-    return <div className="map-fallback">Could not load interactive map: {loadError}</div>;
-  }
-
-  if (!data) {
-    return <div className="map-fallback">Loading interactive ecoregion map…</div>;
+    return <div className="map-fallback">Could not load map: {loadError}</div>;
   }
 
   return (
-    <div className="eco-map">
+    <div className={`eco-map${compact ? " eco-map-compact" : ""}`}>
       <MapContainer
-        center={[48, -100]}
-        zoom={2}
-        minZoom={1}
-        maxZoom={8}
+        center={view.center}
+        zoom={view.zoom}
+        minZoom={2}
+        maxZoom={10}
         scrollWheelZoom
         attributionControl={false}
         className="eco-map-canvas"
       >
         <MapResizeFix />
+        <ViewPersistence view={view} onViewChange={onViewChange} />
+        {/* Street-style basemap with city/place labels (OSM / CARTO Voyager). */}
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
         />
-        <GeoJSON
-          ref={geoJsonRef}
-          data={data}
-          style={(feature) => pathStyle(feature?.properties?.code ?? "", selectedRef.current)}
-          onEachFeature={(feature, layer) => {
-            const props = (feature as EcoFeature).properties;
-            layer.bindTooltip(`${props.code} · ${props.name}`, { sticky: true, opacity: 0.95 });
-            layer.on({
-              click: () => onSelect(props.code),
-              mouseover: (event) => {
-                const target = event.target as L.Path;
-                target.setStyle({
-                  weight: 2,
-                  fillOpacity: 0.72,
-                  color: "#0d6670"
-                });
-                target.bringToFront();
-              },
-              mouseout: (event) => {
-                const target = event.target as L.Path;
-                target.setStyle(pathStyle(props.code, selectedRef.current));
-                if (props.code === selectedRef.current) target.bringToFront();
-              }
-            });
-          }}
-        />
-        <FocusSelected data={data} selectedCode={selectedCode} />
+        {showEcoregions && data ? (
+          <GeoJSON
+            key="ecoregions-on"
+            ref={geoJsonRef}
+            data={data}
+            style={(feature) => pathStyle(feature?.properties?.code ?? "", selectedRef.current)}
+            onEachFeature={(feature, layer) => {
+              const props = (feature as EcoFeature).properties;
+              layer.bindTooltip(`${props.code} · ${props.name}`, { sticky: true, opacity: 0.95 });
+              layer.on({
+                click: () => onSelect(props.code),
+                mouseover: (event) => {
+                  const target = event.target as L.Path;
+                  target.setStyle({
+                    weight: 2,
+                    fillOpacity: 0.7,
+                    color: "#0d6670"
+                  });
+                  target.bringToFront();
+                },
+                mouseout: (event) => {
+                  const target = event.target as L.Path;
+                  target.setStyle(pathStyle(props.code, selectedRef.current));
+                  if (props.code === selectedRef.current) target.bringToFront();
+                }
+              });
+            }}
+          />
+        ) : null}
+        <FocusSelected data={data} selectedCode={selectedCode} enabled={showEcoregions} />
       </MapContainer>
+
+      <div className="map-toolbar">
+        <button
+          type="button"
+          className={`map-toggle${showEcoregions ? " active" : ""}`}
+          onClick={() => onShowEcoregionsChange(!showEcoregions)}
+          aria-pressed={showEcoregions}
+        >
+          {showEcoregions ? "Ecoregions on" : "Ecoregions off"}
+        </button>
+      </div>
     </div>
   );
 }

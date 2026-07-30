@@ -2,12 +2,12 @@
 
 import dynamic from "next/dynamic";
 import Papa from "papaparse";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 const EcoRegionMap = dynamic(() => import("./EcoRegionMap"), {
   ssr: false,
-  loading: () => <div className="map-fallback">Loading interactive ecoregion map…</div>
+  loading: () => <div className="map-fallback">Loading map…</div>
 });
 
 type CsvRow = Record<string, string | number | null | undefined>;
@@ -105,20 +105,19 @@ export default function ClimateDashboard() {
   const [enabledScenarios, setEnabledScenarios] = useState<string[]>([...SCENARIOS]);
   const [ecoregions, setEcoregions] = useState<EcoRegion[]>([]);
   const [data, setData] = useState<Record<Variable, CsvRow[]>>({ tas: [], pr: [] });
-  const [loading, setLoading] = useState(true);
+  const [ecoLoading, setEcoLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [generated, setGenerated] = useState(false);
   const [error, setError] = useState("");
+  const [showEcoregions, setShowEcoregions] = useState(false);
+  const [mapView, setMapView] = useState({ center: [45, -100] as [number, number], zoom: 3 });
 
   useEffect(() => {
-    async function loadAll() {
-      setLoading(true);
+    async function loadEcoregions() {
+      setEcoLoading(true);
       setError("");
       try {
-        const [ecoResult, tasResult, prResult] = await Promise.all([
-          loadCsv(["/data/EcoRegionCode.csv"]),
-          loadCsv(["/data/Ave25yearSpan_tas.csv", "/data/EcoregionAve25yearSpan_tas.csv"]),
-          loadCsv(["/data/Ave25yearSpan_pr.csv", "/data/EcoregionAve25yearSpan_pr.csv"])
-        ]);
-
+        const ecoResult = await loadCsv(["/data/EcoRegionCode.csv"]);
         const ecoRows = ecoResult.rows.map((row) => {
           const values = Object.values(row).map(normalize);
           return { code: values[0], level1: values[1], level2: values[2], level3: values[3] };
@@ -126,15 +125,33 @@ export default function ClimateDashboard() {
 
         setEcoregions(ecoRows);
         setSelectedEco(ecoRows[0]?.code ?? "");
-        setData({ tas: tasResult.rows, pr: prResult.rows });
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {
-        setLoading(false);
+        setEcoLoading(false);
       }
     }
-    loadAll();
+    loadEcoregions();
   }, []);
+
+  const handleGenerate = useCallback(async () => {
+    setGenerating(true);
+    setError("");
+    try {
+      if (!data.tas.length || !data.pr.length) {
+        const [tasResult, prResult] = await Promise.all([
+          loadCsv(["/data/Ave25yearSpan_tas.csv", "/data/EcoregionAve25yearSpan_tas.csv"]),
+          loadCsv(["/data/Ave25yearSpan_pr.csv", "/data/EcoregionAve25yearSpan_pr.csv"])
+        ]);
+        setData({ tas: tasResult.rows, pr: prResult.rows });
+      }
+      setGenerated(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setGenerating(false);
+    }
+  }, [data.tas.length, data.pr.length]);
 
   const currentRows = data[variable];
   const headers = useMemo(() => currentRows.length ? Object.keys(currentRows[0]) : [], [currentRows]);
@@ -145,7 +162,7 @@ export default function ClimateDashboard() {
   const metricHeader = valueColumn(headers, variable, season);
 
   const schemaError = useMemo(() => {
-    if (!currentRows.length) return "";
+    if (!generated || !currentRows.length) return "";
     const missing = [
       !ecoHeader && "ecoregion column",
       !termHeader && "term/period column",
@@ -154,12 +171,12 @@ export default function ClimateDashboard() {
     ].filter(Boolean);
     if (!missing.length) return "";
     return `CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
-  }, [currentRows, ecoHeader, termHeader, scenarioHeader, metricHeader, season, variable, headers]);
+  }, [generated, currentRows, ecoHeader, termHeader, scenarioHeader, metricHeader, season, variable, headers]);
 
   const selectedRegion = ecoregions.find((region) => region.code === selectedEco);
 
   const traces = useMemo(() => {
-    if (!ecoHeader || !termHeader || !scenarioHeader || !metricHeader) return [];
+    if (!generated || !ecoHeader || !termHeader || !scenarioHeader || !metricHeader) return [];
     const selectedRows = currentRows.filter((row) => normalize(row[ecoHeader]) === selectedEco);
     const output: any[] = [];
 
@@ -218,7 +235,7 @@ export default function ClimateDashboard() {
       });
     });
     return output;
-  }, [currentRows, selectedEco, ecoHeader, termHeader, scenarioHeader, modelHeader, metricHeader, enabledScenarios]);
+  }, [generated, currentRows, selectedEco, ecoHeader, termHeader, scenarioHeader, modelHeader, metricHeader, enabledScenarios]);
 
   const toggleScenario = (scenario: string) => {
     setEnabledScenarios((previous) => previous.includes(scenario)
@@ -228,18 +245,19 @@ export default function ClimateDashboard() {
 
   const yTitle = variable === "tas" ? "Changes compared with the past (°C)" : "Changes compared with the past (%)";
   const variableTitle = variable === "tas" ? "Mean temperature" : "Precipitation";
+  const canGenerate = !ecoLoading && !!selectedEco && !generating;
 
   return (
     <main className="shell">
       <header className="hero">
         <div>
           <h1>Climate projection explorer</h1>
-          <p className="subtitle">Compare individual GCM projections, multi-model averages, and uncertainty distributions across four SSP scenarios and three future 25-year periods.</p>
+          <p className="subtitle">Choose an ecoregion on the map, set your options, then generate the projection chart.</p>
         </div>
         <div className="hero-note">Small dots are individual climate models. Large X markers are multi-model means. Violin widths show where model projections are concentrated.</div>
       </header>
 
-      <section className="dashboard">
+      <section className={`dashboard${generated ? " dashboard-generated" : ""}`}>
         <aside className="panel controls">
           <h2>Controls</h2>
 
@@ -260,8 +278,15 @@ export default function ClimateDashboard() {
 
           <div className="control-group">
             <label htmlFor="ecoregion">Level III ecoregion</label>
-            <select id="ecoregion" value={selectedEco} onChange={(event) => setSelectedEco(event.target.value)}>
-              {ecoregions.map((region) => <option key={region.code} value={region.code}>{region.code} — {region.level3}</option>)}
+            <select
+              id="ecoregion"
+              value={selectedEco}
+              onChange={(event) => setSelectedEco(event.target.value)}
+              disabled={ecoLoading}
+            >
+              {ecoregions.map((region) => (
+                <option key={region.code} value={region.code}>{region.code} — {region.level3}</option>
+              ))}
             </select>
           </div>
 
@@ -277,58 +302,97 @@ export default function ClimateDashboard() {
             </div>
           </div>
 
-          <div className="map-card">
-            <EcoRegionMap selectedCode={selectedEco} onSelect={setSelectedEco} />
-            <div className="map-caption">Click a Level III ecoregion on the map to select it</div>
+          <div className="control-group generate-group">
+            <button type="button" className="generate-btn" onClick={handleGenerate} disabled={!canGenerate}>
+              {generating ? "Generating…" : generated ? "Update chart" : "Generate chart"}
+            </button>
           </div>
+
+          {generated ? (
+            <div className="map-card">
+              <EcoRegionMap
+                selectedCode={selectedEco}
+                onSelect={setSelectedEco}
+                showEcoregions={showEcoregions}
+                onShowEcoregionsChange={setShowEcoregions}
+                view={mapView}
+                onViewChange={setMapView}
+                compact
+              />
+              <div className="map-caption">Toggle ecoregions on the map, then click a region to select it</div>
+            </div>
+          ) : null}
+
+          {error && !generated ? <div className="error control-error">{error}</div> : null}
         </aside>
 
         <div className="content">
-          <section className="panel chart-panel">
-            <div className="chart-head">
-              <div>
-                <h2>{season[0].toUpperCase() + season.slice(1)} {variableTitle} change</h2>
-                <p>{selectedEco}{selectedRegion ? ` · ${selectedRegion.level1} · ${selectedRegion.level2} · ${selectedRegion.level3}` : ""}</p>
+          {!generated ? (
+            <section className="panel map-stage">
+              <div className="chart-head">
+                <div>
+                  <h2>North America</h2>
+                  <p>Street map with major cities. Turn on ecoregions to select a region by clicking.</p>
+                </div>
               </div>
-            </div>
-
-            {loading ? <div className="status">Loading climate CSV files…</div> : null}
-            {error ? <div className="error">{error}</div> : null}
-            {schemaError ? <div className="error">{schemaError}</div> : null}
-            {!loading && !error && !schemaError ? (
-              <div className="chart-wrap">
-                <Plot
-                  data={traces}
-                  layout={{
-                    autosize: true,
-                    margin: { l: 64, r: 16, t: 12, b: 110 },
-                    paper_bgcolor: "rgba(0,0,0,0)",
-                    plot_bgcolor: "rgba(0,0,0,0)",
-                    font: { family: "Inter, system-ui, sans-serif", color: "#203039", size: 12 },
-                    hovermode: "closest",
-                    violinmode: "overlay",
-                    xaxis: {
-                      title: { text: "25-year span", font: { size: 14 } },
-                      tickmode: "array", tickvals: X_POSITIONS, ticktext: X_LABELS,
-                      tickangle: -40, range: [-1.2, 22.2], fixedrange: false,
-                      tickfont: { size: 10 },
-                      gridcolor: "rgba(105,125,130,.13)", zeroline: false
-                    },
-                    yaxis: {
-                      title: { text: yTitle, font: { size: 13 } },
-                      range: variable === "tas" ? [-5, 20] : undefined,
-                      tickfont: { size: 11 },
-                      gridcolor: "rgba(105,125,130,.18)", zerolinecolor: "rgba(70,90,95,.35)"
-                    },
-                    legend: { orientation: "h", x: .5, xanchor: "center", y: -0.28, yanchor: "top", font: { size: 11 } }
-                  }}
-                  config={{ responsive: true, displaylogo: false, toImageButtonOptions: { format: "png", filename: `cmip6_${selectedEco}_${variable}_${season}` } }}
-                  style={{ width: "100%", height: "100%" }}
-                  useResizeHandler
+              <div className="map-stage-body">
+                <EcoRegionMap
+                  selectedCode={selectedEco}
+                  onSelect={setSelectedEco}
+                  showEcoregions={showEcoregions}
+                  onShowEcoregionsChange={setShowEcoregions}
+                  view={mapView}
+                  onViewChange={setMapView}
                 />
               </div>
-            ) : null}
-          </section>
+            </section>
+          ) : (
+            <section className="panel chart-panel">
+              <div className="chart-head">
+                <div>
+                  <h2>{season[0].toUpperCase() + season.slice(1)} {variableTitle} change</h2>
+                  <p>{selectedEco}{selectedRegion ? ` · ${selectedRegion.level1} · ${selectedRegion.level2} · ${selectedRegion.level3}` : ""}</p>
+                </div>
+              </div>
+
+              {generating ? <div className="status">Loading climate CSV files…</div> : null}
+              {error ? <div className="error">{error}</div> : null}
+              {schemaError ? <div className="error">{schemaError}</div> : null}
+              {!generating && !error && !schemaError ? (
+                <div className="chart-wrap">
+                  <Plot
+                    data={traces}
+                    layout={{
+                      autosize: true,
+                      margin: { l: 64, r: 16, t: 12, b: 110 },
+                      paper_bgcolor: "rgba(0,0,0,0)",
+                      plot_bgcolor: "rgba(0,0,0,0)",
+                      font: { family: "Inter, system-ui, sans-serif", color: "#203039", size: 12 },
+                      hovermode: "closest",
+                      violinmode: "overlay",
+                      xaxis: {
+                        title: { text: "25-year span", font: { size: 14 } },
+                        tickmode: "array", tickvals: X_POSITIONS, ticktext: X_LABELS,
+                        tickangle: -40, range: [-1.2, 22.2], fixedrange: false,
+                        tickfont: { size: 10 },
+                        gridcolor: "rgba(105,125,130,.13)", zeroline: false
+                      },
+                      yaxis: {
+                        title: { text: yTitle, font: { size: 13 } },
+                        range: variable === "tas" ? [-5, 20] : undefined,
+                        tickfont: { size: 11 },
+                        gridcolor: "rgba(105,125,130,.18)", zerolinecolor: "rgba(70,90,95,.35)"
+                      },
+                      legend: { orientation: "h", x: .5, xanchor: "center", y: -0.28, yanchor: "top", font: { size: 11 } }
+                    }}
+                    config={{ responsive: true, displaylogo: false, toImageButtonOptions: { format: "png", filename: `cmip6_${selectedEco}_${variable}_${season}` } }}
+                    style={{ width: "100%", height: "100%" }}
+                    useResizeHandler
+                  />
+                </div>
+              ) : null}
+            </section>
+          )}
         </div>
       </section>
     </main>

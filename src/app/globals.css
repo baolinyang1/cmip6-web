@@ -148,6 +148,29 @@ select:focus, input:focus {
   font-size: clamp(11px, 1.25vh, 13px);
 }
 
+.generate-group {
+  display: grid;
+  gap: 8px;
+}
+.generate-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 11px;
+  padding: clamp(10px, 1.3vh, 12px) 14px;
+  background: var(--brand);
+  color: white;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(13, 102, 112, .22);
+}
+.generate-btn:hover:not(:disabled) { filter: brightness(1.05); }
+.generate-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.control-error { margin: 10px 0 0; }
+
 .map-card {
   margin-top: clamp(8px, 1.2vh, 14px);
   flex: 1 1 auto;
@@ -166,12 +189,36 @@ select:focus, input:focus {
   font-size: 10px;
 }
 .eco-map {
+  position: relative;
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
   height: auto;
 }
 .eco-map-canvas { height: 100%; width: 100%; background: #e7eef0; }
+.map-toolbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+}
+.map-toggle {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, .95);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(20, 45, 50, .16);
+}
+.map-toggle.active {
+  background: var(--brand);
+  color: white;
+}
 .map-fallback {
   display: grid;
   place-items: center;
@@ -199,6 +246,21 @@ select:focus, input:focus {
   flex-direction: column;
   overflow: hidden;
 }
+.map-stage {
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.map-stage-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 10px 10px;
+}
+.map-stage-body .eco-map { min-height: 0; }
 .chart-panel {
   overflow: hidden;
   flex: 1;
@@ -266,6 +328,7 @@ select:focus, input:focus {
   .controls { overflow: visible; }
   .map-card { min-height: 260px; }
   .eco-map { min-height: 240px; }
+  .map-stage-body { min-height: 360px; }
   .chart-wrap { min-height: 420px; }
   .chart-wrap > div { min-height: 400px; }
 }
@@ -274,3 +337,4 @@ select:focus, input:focus {
   .subtitle { display: none; }
   .hero-note { display: none; }
 }
+

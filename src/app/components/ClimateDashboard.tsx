@@ -306,11 +306,11 @@ export default function ClimateDashboard() {
     const stageH = stage?.clientHeight ?? 0;
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id) return chart;
-      const h = chart.collapsed ? COLLAPSED_HEIGHT : chart.height;
       return {
         ...chart,
         x: clamp(x, 0, Math.max(0, stageW - chart.width)),
-        y: clamp(y, 0, Math.max(0, stageH - h))
+        // Allow hanging below the workspace; keep the title bar reachable.
+        y: clamp(y, 0, Math.max(0, stageH - COLLAPSED_HEIGHT))
       };
     }));
   }, []);

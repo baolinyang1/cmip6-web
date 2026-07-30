@@ -72,7 +72,7 @@ h1 {
   grid-template-columns: minmax(230px, 26vw) minmax(0, 1fr);
   gap: clamp(10px, 1.2vw, 18px);
   align-items: stretch;
-  overflow: hidden;
+  overflow: visible;
 }
 .dashboard-map-only {
   grid-template-columns: minmax(0, 1fr);
@@ -309,7 +309,7 @@ h1 {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   align-self: stretch;
 }
 .map-stage {
@@ -335,7 +335,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
 }
 .chart-workspace-toolbar {
   position: absolute;
@@ -393,7 +393,7 @@ h1 {
   position: absolute;
   inset: 0;
   z-index: 2;
-  overflow: hidden;
+  overflow: visible;
 }
 .chart-head {
   flex: 0 0 auto;

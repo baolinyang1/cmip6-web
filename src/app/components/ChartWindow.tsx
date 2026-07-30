@@ -136,9 +136,9 @@ export default function ChartWindow({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
-        <div className="chart-window-titles">
+        <div className="chart-window-titles" title={`${chart.title}\n${chart.subtitle}`}>
           <strong>{chart.title}</strong>
-          <span>{chart.subtitle}</span>
+          <span title={chart.subtitle}>{chart.subtitle}</span>
         </div>
         <div className="chart-window-actions">
           <button

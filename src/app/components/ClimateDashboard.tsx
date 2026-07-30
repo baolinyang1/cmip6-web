@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Papa from "papaparse";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import ChartWindow, {
   COLLAPSED_HEIGHT,
@@ -10,6 +10,7 @@ import ChartWindow, {
   MIN_WINDOW_WIDTH,
   type ChartWindowModel
 } from "./ChartWindow";
+import type { RegionLabel } from "./EcoRegionMap";
 import {
   buildTraces,
   normalize,
@@ -41,6 +42,13 @@ const HEADER_SPACE = 72;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
+}
+
+/** EPA Level II names ship in ALL CAPS; normalize for display. */
+function titleCaseName(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/\b([a-z])/g, (char) => char.toUpperCase());
 }
 
 function layoutSlot(
@@ -123,7 +131,12 @@ export default function ClimateDashboard() {
         const ecoResult = await loadCsv(["/data/EcoRegionCode.csv"]);
         const ecoRows = ecoResult.rows.map((row) => {
           const values = Object.values(row).map(normalize);
-          return { code: values[0], level1: values[1], level2: values[2], level3: values[3] };
+          return {
+            code: values[0],
+            level1: values[1],
+            level2: titleCaseName(values[2]),
+            level3: values[3]
+          };
         }).filter((row) => row.code);
 
         setEcoregions(ecoRows);
@@ -138,6 +151,18 @@ export default function ClimateDashboard() {
   }, []);
 
   const hasCharts = charts.length > 0;
+
+  const regionLabels = useMemo(() => {
+    const map: Record<string, RegionLabel> = {};
+    for (const region of ecoregions) {
+      map[region.code] = {
+        level1: region.level1,
+        level2: region.level2,
+        level3: region.level3
+      };
+    }
+    return map;
+  }, [ecoregions]);
 
   const handleGenerate = useCallback(async () => {
     setGenerating(true);
@@ -187,7 +212,9 @@ export default function ClimateDashboard() {
         {
           id: `${idBase}-${index}`,
           title: `${season[0].toUpperCase() + season.slice(1)} ${variableTitle(variable)} change`,
-          subtitle: `${selectedEco}${region ? ` · ${region.level3}` : ""}`,
+          subtitle: region
+            ? `${selectedEco} · ${region.level1} · ${region.level2} · ${region.level3}`
+            : selectedEco,
           variable,
           traces,
           x,
@@ -317,7 +344,13 @@ export default function ClimateDashboard() {
                 disabled={ecoLoading}
               >
                 {ecoregions.map((region) => (
-                  <option key={region.code} value={region.code}>{region.code} — {region.level3}</option>
+                  <option
+                    key={region.code}
+                    value={region.code}
+                    title={`${region.code} · ${region.level1} · ${region.level2} · ${region.level3}`}
+                  >
+                    {region.code} — {region.level3}
+                  </option>
                 ))}
               </select>
             </div>
@@ -356,6 +389,7 @@ export default function ClimateDashboard() {
                   onShowEcoregionsChange={setShowEcoregions}
                   view={mapView}
                   onViewChange={setMapView}
+                  regionLabels={regionLabels}
                   compact
                 />
                 <div className="map-caption">Toggle ecoregions, then click a region to select it</div>
@@ -387,6 +421,7 @@ export default function ClimateDashboard() {
                   onShowEcoregionsChange={setShowEcoregions}
                   view={mapView}
                   onViewChange={setMapView}
+                  regionLabels={regionLabels}
                 />
               </div>
             </section>

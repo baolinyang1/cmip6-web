@@ -5,10 +5,17 @@ import L from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import "./eco-map.css";
 
 export type MapViewState = {
   center: [number, number];
   zoom: number;
+};
+
+export type RegionLabel = {
+  level1: string;
+  level2: string;
+  level3: string;
 };
 
 type EcoFeatureProps = {
@@ -117,8 +124,11 @@ function ViewPersistence({
 }) {
   const map = useMap();
   const onViewChangeRef = useRef(onViewChange);
-  onViewChangeRef.current = onViewChange;
   const applyingRef = useRef(false);
+
+  useEffect(() => {
+    onViewChangeRef.current = onViewChange;
+  }, [onViewChange]);
 
   useEffect(() => {
     const center = map.getCenter();
@@ -161,6 +171,7 @@ export default function EcoRegionMap({
   onShowEcoregionsChange,
   view,
   onViewChange,
+  regionLabels = {},
   compact = false
 }: {
   selectedCode: string;
@@ -169,13 +180,38 @@ export default function EcoRegionMap({
   onShowEcoregionsChange: (show: boolean) => void;
   view: MapViewState;
   onViewChange: (view: MapViewState) => void;
+  regionLabels?: Record<string, RegionLabel>;
   compact?: boolean;
 }) {
   const [data, setData] = useState<FeatureCollection<Geometry, EcoFeatureProps> | null>(null);
   const [loadError, setLoadError] = useState("");
   const geoJsonRef = useRef<L.GeoJSON | null>(null);
   const selectedRef = useRef(selectedCode);
-  selectedRef.current = selectedCode;
+  const labelsRef = useRef(regionLabels);
+
+  useEffect(() => {
+    selectedRef.current = selectedCode;
+  }, [selectedCode]);
+
+  useEffect(() => {
+    labelsRef.current = regionLabels;
+  }, [regionLabels]);
+
+  function escapeHtml(value: string): string {
+    return value
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+  }
+
+  function tooltipFor(code: string, fallbackName: string): string {
+    const label = labelsRef.current[code];
+    const parts = label
+      ? [code, label.level1, label.level2, label.level3]
+      : [code, fallbackName];
+    return `<span class="eco-map-tooltip-body">${parts.map(escapeHtml).join("<br/>")}</span>`;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -234,13 +270,18 @@ export default function EcoRegionMap({
         />
         {showEcoregions && data ? (
           <GeoJSON
-            key="ecoregions-on"
+            key={`ecoregions-on-${Object.keys(regionLabels).length}`}
             ref={geoJsonRef}
             data={data}
             style={(feature) => pathStyle(feature?.properties?.code ?? "", selectedRef.current)}
             onEachFeature={(feature, layer) => {
               const props = (feature as EcoFeature).properties;
-              layer.bindTooltip(`${props.code} · ${props.name}`, { sticky: true, opacity: 0.95 });
+              layer.bindTooltip(tooltipFor(props.code, props.name), {
+                sticky: true,
+                opacity: 0.95,
+                className: "eco-map-tooltip",
+                direction: "top"
+              });
               layer.on({
                 click: () => onSelect(props.code),
                 mouseover: (event) => {

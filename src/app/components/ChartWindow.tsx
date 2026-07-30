@@ -210,7 +210,15 @@ export default function ChartWindow({
                 }}
                 config={{
                   displaylogo: false,
-                  toImageButtonOptions: { format: "png", filename: `cmip6_${chart.id}` }
+                  toImageButtonOptions: {
+                    format: "png",
+                    filename: `Quarters_${chart.title}_${chart.subtitle}`
+                      .replaceAll(" · ", "_")
+                      .replaceAll(" ", "_")
+                      .replace(/[<>:"/\\|?*]/g, "")
+                      .replace(/_+/g, "_")
+                      .replace(/^_|_$/g, "") || "chart"
+                  }
                 }}
               />
             ) : null}

@@ -233,7 +233,6 @@ export default function ClimateDashboard() {
     <main className="shell">
       <header className="hero">
         <div>
-          <p className="eyebrow">CMIP6 · Level III ecoregions</p>
           <h1>Climate projection explorer</h1>
           <p className="subtitle">Compare individual GCM projections, multi-model averages, and uncertainty distributions across four SSP scenarios and three future 25-year periods.</p>
         </div>

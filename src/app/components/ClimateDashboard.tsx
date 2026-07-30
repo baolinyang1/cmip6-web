@@ -40,6 +40,10 @@ const DEFAULT_HEIGHT = 500;
 const GRID_GAP = 14;
 const HEADER_SPACE = 72;
 const CASCADE_Y = 48;
+/** Vertical gap between collapsed title bars in the collapse-all grid. */
+const COLLAPSED_ROW_GAP = 8;
+/** Top inset inside the stage (toolbar is already in-flow above the stage). */
+const STAGE_TOP = GRID_GAP;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
@@ -233,7 +237,6 @@ export default function ClimateDashboard() {
   const toggleCollapse = useCallback((id: string) => {
     const stage = workspaceRef.current;
     const stageW = stage?.clientWidth ?? 0;
-    const stageH = stage?.clientHeight ?? 0;
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id) return chart;
       if (chart.collapsed) {
@@ -245,7 +248,7 @@ export default function ClimateDashboard() {
           width,
           height,
           x: clamp(chart.x, 0, Math.max(0, stageW - width)),
-          y: clamp(chart.y, 0, Math.max(0, stageH - height)),
+          y: Math.max(0, chart.y),
           savedWidth: undefined,
           savedHeight: undefined
         };
@@ -265,7 +268,6 @@ export default function ClimateDashboard() {
     const stageW = stage?.clientWidth ?? 900;
     const gap = GRID_GAP;
     const cols = 2;
-    const top = 52;
     const layoutWidth = Math.max(280, Math.floor((stageW - gap * (cols + 1)) / cols));
 
     setCharts((previous) => previous.map((chart, index) => {
@@ -284,11 +286,52 @@ export default function ClimateDashboard() {
         savedHeight,
         width: layoutWidth,
         x: gap + col * (layoutWidth + gap),
-        y: top + row * (COLLAPSED_HEIGHT + gap),
+        y: STAGE_TOP + row * (COLLAPSED_HEIGHT + COLLAPSED_ROW_GAP),
         zIndex: 100 + index
       };
     }));
+    workspaceRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  const expandAllCharts = useCallback(() => {
+    flushSync(() => setSidebarOpen(false));
+
+    const stage = workspaceRef.current;
+    // Reflow so clientWidth reflects the full-width workspace after the sidebar closes.
+    void stage?.offsetWidth;
+    const stageW = stage?.clientWidth ?? 900;
+    const gap = GRID_GAP;
+    const cols = stageW >= MIN_WINDOW_WIDTH * 2 + gap * 3 ? 2 : 1;
+    const layoutWidth = Math.max(
+      MIN_WINDOW_WIDTH,
+      Math.floor((stageW - gap * (cols + 1)) / cols)
+    );
+    const layoutHeight = DEFAULT_HEIGHT;
+
+    setCharts((previous) => previous.map((chart, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      return {
+        ...chart,
+        collapsed: false,
+        savedWidth: undefined,
+        savedHeight: undefined,
+        width: layoutWidth,
+        height: layoutHeight,
+        x: gap + col * (layoutWidth + gap),
+        y: STAGE_TOP + row * (layoutHeight + gap),
+        zIndex: 100 + index
+      };
+    }));
+    stage?.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const stageContentHeight = useMemo(() => {
+    if (!charts.length) return 0;
+    return Math.max(
+      ...charts.map((chart) => chart.y + (chart.collapsed ? COLLAPSED_HEIGHT : chart.height))
+    ) + GRID_GAP;
+  }, [charts]);
 
   const focusChart = useCallback((id: string) => {
     setCharts((previous) => {
@@ -303,14 +346,13 @@ export default function ClimateDashboard() {
   const moveChart = useCallback((id: string, x: number, y: number) => {
     const stage = workspaceRef.current;
     const stageW = stage?.clientWidth ?? 0;
-    const stageH = stage?.clientHeight ?? 0;
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id) return chart;
       return {
         ...chart,
         x: clamp(x, 0, Math.max(0, stageW - chart.width)),
-        // Allow hanging below the workspace; keep the title bar reachable.
-        y: clamp(y, 0, Math.max(0, stageH - COLLAPSED_HEIGHT))
+        // Workspace scrolls vertically — keep title bar from going above the stage.
+        y: Math.max(0, y)
       };
     }));
   }, []);
@@ -318,13 +360,12 @@ export default function ClimateDashboard() {
   const resizeChart = useCallback((id: string, width: number, height: number) => {
     const stage = workspaceRef.current;
     const stageW = stage?.clientWidth ?? 0;
-    const stageH = stage?.clientHeight ?? 0;
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id || chart.collapsed) return chart;
       return {
         ...chart,
         width: clamp(width, MIN_WINDOW_WIDTH, Math.max(MIN_WINDOW_WIDTH, stageW - chart.x)),
-        height: clamp(height, MIN_WINDOW_HEIGHT, Math.max(MIN_WINDOW_HEIGHT, stageH - chart.y))
+        height: Math.max(MIN_WINDOW_HEIGHT, height)
       };
     }));
   }, []);
@@ -472,9 +513,14 @@ export default function ClimateDashboard() {
             <section className="panel chart-workspace" ref={workspaceRef}>
               <div className="chart-workspace-toolbar">
                 {hasCharts ? (
-                  <button type="button" className="workspace-tool-btn" onClick={collapseAllCharts}>
-                    Collapse all charts
-                  </button>
+                  <div className="workspace-tool-group">
+                    <button type="button" className="workspace-tool-btn" onClick={collapseAllCharts}>
+                      Collapse all
+                    </button>
+                    <button type="button" className="workspace-tool-btn" onClick={expandAllCharts}>
+                      Expand all
+                    </button>
+                  </div>
                 ) : <span />}
                 <p>Chart workspace: Collapse, expand, or remove charts. Generate more from the sidebar to compare.</p>
                 {hasCharts ? (
@@ -483,7 +529,10 @@ export default function ClimateDashboard() {
                   </button>
                 ) : <span />}
               </div>
-              <div className="chart-workspace-stage">
+              <div
+                className="chart-workspace-stage"
+                style={{ height: Math.max(stageContentHeight, 1) }}
+              >
                 {charts.map((chart) => (
                   <ChartWindow
                     key={chart.id}

@@ -309,7 +309,7 @@ h1 {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   align-self: stretch;
 }
 .map-stage {
@@ -334,20 +334,21 @@ h1 {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  overflow: visible;
+  align-items: stretch;
+  overflow: auto;
 }
 .chart-workspace-toolbar {
-  position: absolute;
-  top: 10px;
-  left: 12px;
-  right: 12px;
-  z-index: 5;
+  position: sticky;
+  top: 0;
+  flex: 0 0 auto;
+  z-index: 20;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 12px;
+  padding: 10px 12px;
   pointer-events: none;
+  background: linear-gradient(180deg, rgba(247, 250, 249, .97) 0%, rgba(238, 244, 242, .92) 70%, rgba(238, 244, 242, 0) 100%);
 }
 .chart-workspace-toolbar > span {
   min-height: 1px;
@@ -363,8 +364,12 @@ h1 {
   text-overflow: ellipsis;
   pointer-events: none;
 }
-.chart-workspace-toolbar > .workspace-tool-btn:first-child {
+.workspace-tool-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-self: start;
+  pointer-events: auto;
 }
 .chart-workspace-toolbar > .workspace-tool-btn:last-child,
 .chart-workspace-toolbar > span:last-child {
@@ -390,10 +395,11 @@ h1 {
 }
 .workspace-tool-btn-danger:hover { background: #fff5f5; }
 .chart-workspace-stage {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 100%;
   z-index: 2;
-  overflow: visible;
 }
 .chart-head {
   flex: 0 0 auto;

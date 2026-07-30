@@ -302,25 +302,26 @@ export default function ClimateDashboard() {
                   data={traces}
                   layout={{
                     autosize: true,
-                    margin: { l: 76, r: 22, t: 20, b: 145 },
+                    margin: { l: 64, r: 16, t: 12, b: 110 },
                     paper_bgcolor: "rgba(0,0,0,0)",
                     plot_bgcolor: "rgba(0,0,0,0)",
-                    font: { family: "Inter, system-ui, sans-serif", color: "#203039" },
+                    font: { family: "Inter, system-ui, sans-serif", color: "#203039", size: 12 },
                     hovermode: "closest",
                     violinmode: "overlay",
                     xaxis: {
-                      title: { text: "25-year span", font: { size: 35 } },
+                      title: { text: "25-year span", font: { size: 14 } },
                       tickmode: "array", tickvals: X_POSITIONS, ticktext: X_LABELS,
-                      tickangle: -48, range: [-1.2, 22.2], fixedrange: false,
-                      tickfont: { size: 12 },
+                      tickangle: -40, range: [-1.2, 22.2], fixedrange: false,
+                      tickfont: { size: 10 },
                       gridcolor: "rgba(105,125,130,.13)", zeroline: false
                     },
                     yaxis: {
-                      title: { text: yTitle },
+                      title: { text: yTitle, font: { size: 13 } },
                       range: variable === "tas" ? [-5, 20] : undefined,
+                      tickfont: { size: 11 },
                       gridcolor: "rgba(105,125,130,.18)", zerolinecolor: "rgba(70,90,95,.35)"
                     },
-                    legend: { orientation: "h", x: .5, xanchor: "center", y: -0.3, yanchor: "top" }
+                    legend: { orientation: "h", x: .5, xanchor: "center", y: -0.28, yanchor: "top", font: { size: 11 } }
                   }}
                   config={{ responsive: true, displaylogo: false, toImageButtonOptions: { format: "png", filename: `cmip6_${selectedEco}_${variable}_${season}` } }}
                   style={{ width: "100%", height: "100%" }}

@@ -74,6 +74,20 @@ function FocusSelected({
   return null;
 }
 
+function MapResizeFix() {
+  const map = useMap();
+  useEffect(() => {
+    const container = map.getContainer();
+    const observer = new ResizeObserver(() => {
+      map.invalidateSize({ animate: false });
+    });
+    observer.observe(container);
+    map.invalidateSize({ animate: false });
+    return () => observer.disconnect();
+  }, [map]);
+  return null;
+}
+
 export default function EcoRegionMap({
   selectedCode,
   onSelect
@@ -138,6 +152,7 @@ export default function EcoRegionMap({
         attributionControl={false}
         className="eco-map-canvas"
       >
+        <MapResizeFix />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'

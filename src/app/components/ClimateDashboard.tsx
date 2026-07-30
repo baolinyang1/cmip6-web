@@ -39,6 +39,7 @@ const DEFAULT_WIDTH = 750;
 const DEFAULT_HEIGHT = 500;
 const GRID_GAP = 14;
 const HEADER_SPACE = 72;
+const CASCADE_Y = 48;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
@@ -55,23 +56,16 @@ function layoutSlot(
   slot: number,
   stageW: number,
   stageH: number,
-  width: number,
-  height: number
+  width: number
 ): { x: number; y: number } {
-  const cols = Math.max(1, Math.floor((stageW - GRID_GAP) / (width + GRID_GAP)));
-  const usableH = Math.max(height, stageH - HEADER_SPACE - GRID_GAP);
-  const rows = Math.max(1, Math.floor(usableH / (height + GRID_GAP)));
-  const capacity = cols * rows;
-  const index = slot % Math.max(1, capacity);
-  const col = index % cols;
-  const row = Math.floor(index / cols);
-  const totalRowWidth = cols * width + (cols - 1) * GRID_GAP;
-  const offsetX = Math.max(GRID_GAP, Math.round((stageW - totalRowWidth) / 2));
-  const x = offsetX + col * (width + GRID_GAP);
-  const y = HEADER_SPACE + row * (height + GRID_GAP);
+  const x = Math.max(GRID_GAP, Math.round((stageW - width) / 2));
+  // Step each new chart down so title bars stay visible; size is unchanged.
+  const maxY = Math.max(HEADER_SPACE, stageH - COLLAPSED_HEIGHT - GRID_GAP);
+  const steps = Math.max(1, Math.floor((maxY - HEADER_SPACE) / CASCADE_Y) + 1);
+  const y = HEADER_SPACE + (slot % steps) * CASCADE_Y;
   return {
     x: clamp(x, GRID_GAP, Math.max(GRID_GAP, stageW - width - GRID_GAP)),
-    y: clamp(y, GRID_GAP, Math.max(GRID_GAP, stageH - height - GRID_GAP))
+    y: clamp(y, HEADER_SPACE, maxY)
   };
 }
 
@@ -203,7 +197,7 @@ export default function ClimateDashboard() {
       const width = Math.min(DEFAULT_WIDTH, Math.max(MIN_WINDOW_WIDTH, stageW - GRID_GAP * 2));
       const height = Math.min(DEFAULT_HEIGHT, Math.max(MIN_WINDOW_HEIGHT, stageH - HEADER_SPACE - GRID_GAP));
       const slot = charts.length;
-      const { x, y } = layoutSlot(slot, stageW, stageH, width, height);
+      const { x, y } = layoutSlot(slot, stageW, stageH, width);
 
       zCounterRef.current += 1;
 
@@ -237,9 +231,63 @@ export default function ClimateDashboard() {
   }, []);
 
   const toggleCollapse = useCallback((id: string) => {
-    setCharts((previous) => previous.map((chart) =>
-      chart.id === id ? { ...chart, collapsed: !chart.collapsed } : chart
-    ));
+    const stage = workspaceRef.current;
+    const stageW = stage?.clientWidth ?? 0;
+    const stageH = stage?.clientHeight ?? 0;
+    setCharts((previous) => previous.map((chart) => {
+      if (chart.id !== id) return chart;
+      if (chart.collapsed) {
+        const width = chart.savedWidth ?? chart.width;
+        const height = chart.savedHeight ?? chart.height;
+        return {
+          ...chart,
+          collapsed: false,
+          width,
+          height,
+          x: clamp(chart.x, 0, Math.max(0, stageW - width)),
+          y: clamp(chart.y, 0, Math.max(0, stageH - height)),
+          savedWidth: undefined,
+          savedHeight: undefined
+        };
+      }
+      // Remember current size (including any enlarge/resize) for restore on expand.
+      return {
+        ...chart,
+        collapsed: true,
+        savedWidth: chart.width,
+        savedHeight: chart.height
+      };
+    }));
+  }, []);
+
+  const collapseAllCharts = useCallback(() => {
+    const stage = workspaceRef.current;
+    const stageW = stage?.clientWidth ?? 900;
+    const gap = GRID_GAP;
+    const cols = 2;
+    const top = 52;
+    const layoutWidth = Math.max(280, Math.floor((stageW - gap * (cols + 1)) / cols));
+
+    setCharts((previous) => previous.map((chart, index) => {
+      const col = index % cols;
+      const row = Math.floor(index / cols);
+      const savedWidth = chart.collapsed
+        ? (chart.savedWidth ?? chart.width)
+        : chart.width;
+      const savedHeight = chart.collapsed
+        ? (chart.savedHeight ?? chart.height)
+        : chart.height;
+      return {
+        ...chart,
+        collapsed: true,
+        savedWidth,
+        savedHeight,
+        width: layoutWidth,
+        x: gap + col * (layoutWidth + gap),
+        y: top + row * (COLLAPSED_HEIGHT + gap),
+        zIndex: 100 + index
+      };
+    }));
   }, []);
 
   const focusChart = useCallback((id: string) => {
@@ -369,13 +417,8 @@ export default function ClimateDashboard() {
 
             <div className="control-group generate-group">
               <button type="button" className="generate-btn" onClick={handleGenerate} disabled={!canGenerate}>
-                {generating ? "Generating…" : workspaceActive ? "Generate another chart" : "Generate chart"}
+                {generating ? "Generating…" : workspaceActive ? "Generate chart" : "Generate chart"}
               </button>
-              {hasCharts ? (
-                <button type="button" className="secondary-btn" onClick={() => setCharts([])}>
-                  Remove all charts ({charts.length})
-                </button>
-              ) : null}
             </div>
 
             {error ? <div className="error control-error">{error}</div> : null}
@@ -427,9 +470,18 @@ export default function ClimateDashboard() {
             </section>
           ) : (
             <section className="panel chart-workspace" ref={workspaceRef}>
-              <div className="chart-workspace-center">
-                <h2>Chart workspace</h2>
-                <p>Collapse, expand, or remove charts. Generate more from the sidebar to compare.</p>
+              <div className="chart-workspace-toolbar">
+                {hasCharts ? (
+                  <button type="button" className="workspace-tool-btn" onClick={collapseAllCharts}>
+                    Collapse all charts
+                  </button>
+                ) : <span />}
+                <p>Chart workspace: Collapse, expand, or remove charts. Generate more from the sidebar to compare.</p>
+                {hasCharts ? (
+                  <button type="button" className="workspace-tool-btn workspace-tool-btn-danger" onClick={() => setCharts([])}>
+                    Remove all charts ({charts.length})
+                  </button>
+                ) : <span />}
               </div>
               <div className="chart-workspace-stage">
                 {charts.map((chart) => (

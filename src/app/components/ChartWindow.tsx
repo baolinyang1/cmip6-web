@@ -23,6 +23,9 @@ export type ChartWindowModel = {
   height: number;
   zIndex: number;
   collapsed: boolean;
+  /** Size to restore when expanding after collapse. */
+  savedWidth?: number;
+  savedHeight?: number;
 };
 
 type ChartWindowProps = {

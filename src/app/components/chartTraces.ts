@@ -14,9 +14,9 @@ export const PERIODS = ["near-term Past", "near-term Future", "mid-term Future",
 
 export const X_LABELS = [
   "Near-term Past",
-  "SSP126<br>Near-term Future", "SSP245<br>Near-term Future", "SSP370<br>Near-term Future", "SSP585<br>Near-term Future",
-  "SSP126<br>Mid-term Future", "SSP245<br>Mid-term Future", "SSP370<br>Mid-term Future", "SSP585<br>Mid-term Future",
-  "SSP126<br>Long-term Future", "SSP245<br>Long-term Future", "SSP370<br>Long-term Future", "SSP585<br>Long-term Future"
+  "SSP126 Near-term Future", "SSP245 Near-term Future", "SSP370 Near-term Future", "SSP585 Near-term Future",
+  "SSP126 Mid-term Future", "SSP245 Mid-term Future", "SSP370 Mid-term Future", "SSP585 Mid-term Future",
+  "SSP126 Long-term Future", "SSP245 Long-term Future", "SSP370 Long-term Future", "SSP585 Long-term Future"
 ];
 
 export const X_POSITIONS = [0, 6, 7, 8, 9, 12, 13, 14, 15, 18, 19, 20, 21];

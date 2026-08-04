@@ -45,6 +45,43 @@ const COLLAPSED_ROW_GAP = 8;
 /** Top inset inside the stage (toolbar is already in-flow above the stage). */
 const STAGE_TOP = GRID_GAP;
 
+type HelpTopic = "variable" | "season" | "ecoregion" | "scenarios";
+
+const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
+  variable: {
+    title: "Climate variable",
+    body: [
+      "This chooses what the chart measures. Values are changes compared with the near-term past baseline — not the absolute temperature or rainfall amount.",
+      "Temperature shows warming or cooling in degrees Celsius (°C). For example, +2°C means that period is about 2°C warmer than the near-term past for the same region.",
+      "Precipitation shows wetter or drier conditions as a percent (%). For example, +10% means about 10% more precipitation than the near-term past."
+    ]
+  },
+  season: {
+    title: "Season",
+    body: [
+      "This chooses which part of the year the chart summarizes.",
+      "Annual uses data for the full year. Winter, spring, summer, and fall each focus on that season only.",
+      "Seasonal views help you see whether change is stronger in a particular time of year (for example, hotter summers or wetter winters)."
+    ]
+  },
+  ecoregion: {
+    title: "Ecoregion",
+    body: [
+      "An ecoregion is a geographic area with similar ecosystems, climate, and landscapes. This tool uses EPA Level III ecoregions across North America.",
+      "Pick a region from the list, or turn on ecoregion layers on the map and click a region. The chart then shows climate projections for that area only.",
+      "Each option is labeled with a code and Level III name. Hover an option to see the broader Level I and Level II context."
+    ]
+  },
+  scenarios: {
+    title: "SSP scenarios",
+    body: [
+      "SSP means Shared Socioeconomic Pathway — a possible future for society, energy use, and greenhouse gas emissions.",
+      "Lower numbers (like SSP126) represent lower-emission futures. Higher numbers (like SSP585) represent higher-emission futures with more warming risk.",
+      "Check the scenarios you want to compare on the chart. Uncheck any you want to hide so the plot is easier to read."
+    ]
+  }
+};
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
@@ -116,10 +153,15 @@ export default function ClimateDashboard() {
   const [charts, setCharts] = useState<ChartWindowModel[]>([]);
   const [workspaceActive, setWorkspaceActive] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [helpTopic, setHelpTopic] = useState<HelpTopic | null>(null);
   const idBase = useId();
   const chartCountRef = useRef(0);
   const zCounterRef = useRef(100);
   const workspaceRef = useRef<HTMLElement | null>(null);
+
+  const toggleHelp = useCallback((topic: HelpTopic) => {
+    setHelpTopic((current) => (current === topic ? null : topic));
+  }, []);
 
   useEffect(() => {
     async function loadEcoregions() {
@@ -382,7 +424,10 @@ export default function ClimateDashboard() {
     <main className="shell">
       <header className="hero">
         <div>
-          <h1>Climate projection explorer</h1>
+          <h1>
+            Climate projection explorer
+            <span className="hero-intro">Explore how temperature and precipitation may change across North American ecoregions under future climate scenarios in quarters.</span>
+          </h1>
           <p className="subtitle">
             {workspaceActive
               ? "Collapse, expand, or remove charts. The map stays in the sidebar — generate more to compare."
@@ -410,7 +455,26 @@ export default function ClimateDashboard() {
             </div>
 
             <div className="control-group">
-              <label>Climate variable</label>
+              <div className="control-label-row">
+                <label>Climate variable</label>
+                <button
+                  type="button"
+                  className={`help-icon${helpTopic === "variable" ? " active" : ""}`}
+                  aria-label="Help: Climate variable"
+                  aria-expanded={helpTopic === "variable"}
+                  title="Help"
+                  onClick={() => toggleHelp("variable")}
+                >
+                  ?
+                </button>
+              </div>
+              {helpTopic === "variable" ? (
+                <div className="control-help" role="region" aria-label="Climate variable help">
+                  {CONTROL_HELP.variable.body.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
               <div className="segmented">
                 <button className={variable === "tas" ? "active" : ""} onClick={() => setVariable("tas")}>Temperature</button>
                 <button className={variable === "pr" ? "active" : ""} onClick={() => setVariable("pr")}>Precipitation</button>
@@ -418,14 +482,52 @@ export default function ClimateDashboard() {
             </div>
 
             <div className="control-group">
-              <label htmlFor="season">Season</label>
+              <div className="control-label-row">
+                <label htmlFor="season">Season</label>
+                <button
+                  type="button"
+                  className={`help-icon${helpTopic === "season" ? " active" : ""}`}
+                  aria-label="Help: Season"
+                  aria-expanded={helpTopic === "season"}
+                  title="Help"
+                  onClick={() => toggleHelp("season")}
+                >
+                  ?
+                </button>
+              </div>
+              {helpTopic === "season" ? (
+                <div className="control-help" role="region" aria-label="Season help">
+                  {CONTROL_HELP.season.body.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
               <select id="season" value={season} onChange={(event) => setSeason(event.target.value as Season)}>
                 {SEASONS.map((item) => <option key={item} value={item}>{item[0].toUpperCase() + item.slice(1)}</option>)}
               </select>
             </div>
 
             <div className="control-group">
-              <label htmlFor="ecoregion">Level III ecoregion</label>
+              <div className="control-label-row">
+                <label htmlFor="ecoregion">Level III ecoregion</label>
+                <button
+                  type="button"
+                  className={`help-icon${helpTopic === "ecoregion" ? " active" : ""}`}
+                  aria-label="Help: Ecoregion"
+                  aria-expanded={helpTopic === "ecoregion"}
+                  title="Help"
+                  onClick={() => toggleHelp("ecoregion")}
+                >
+                  ?
+                </button>
+              </div>
+              {helpTopic === "ecoregion" ? (
+                <div className="control-help" role="region" aria-label="Ecoregion help">
+                  {CONTROL_HELP.ecoregion.body.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
               <select
                 id="ecoregion"
                 value={selectedEco}
@@ -445,7 +547,26 @@ export default function ClimateDashboard() {
             </div>
 
             <div className="control-group">
-              <label>SSP scenarios</label>
+              <div className="control-label-row">
+                <label>SSP scenarios</label>
+                <button
+                  type="button"
+                  className={`help-icon${helpTopic === "scenarios" ? " active" : ""}`}
+                  aria-label="Help: SSP scenarios"
+                  aria-expanded={helpTopic === "scenarios"}
+                  title="Help"
+                  onClick={() => toggleHelp("scenarios")}
+                >
+                  ?
+                </button>
+              </div>
+              {helpTopic === "scenarios" ? (
+                <div className="control-help" role="region" aria-label="SSP scenarios help">
+                  {CONTROL_HELP.scenarios.body.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
               <div className="checks">
                 {SCENARIOS.map((scenario) => (
                   <label className="check" key={scenario}>

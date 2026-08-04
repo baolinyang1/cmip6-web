@@ -48,7 +48,19 @@ h1 {
   font-size: clamp(22px, 3.2vh + 1vw, 42px);
   line-height: 1.02;
   letter-spacing: -.045em;
-  max-width: 850px;
+  max-width: 1100px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px 14px;
+}
+.hero-intro {
+  font-size: clamp(12px, 1.35vh, 15px);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--muted);
+  max-width: 48em;
 }
 .subtitle {
   margin: clamp(4px, 0.8vh, 10px) 0 0;
@@ -142,11 +154,61 @@ h1 {
   margin-top: 8px;
   flex: 0 0 auto;
 }
-.control-group label {
+.control-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.control-label-row label {
+  display: block;
+  margin-bottom: 0;
+  font-size: 11px;
+  font-weight: 750;
+}
+.control-group > label {
   display: block;
   margin-bottom: 3px;
   font-size: 11px;
   font-weight: 750;
+}
+.help-icon {
+  border: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #edf2f2;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.help-icon:hover {
+  background: #e2eaea;
+  color: var(--ink);
+}
+.help-icon.active {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+.control-help {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7faf9;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.control-help p {
+  margin: 0;
+}
+.control-help p + p {
+  margin-top: 6px;
 }
 .controls select {
   width: 100%;

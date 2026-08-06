@@ -1,3 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #13212a;
+  --color-muted: #5f6f78;
+  --color-line: #dce5e9;
+  --color-panel: rgba(255, 255, 255, 0.92);
+  --color-brand: #0d6670;
+  --color-brand-soft: #e8f5f3;
+  --color-bg: #eef4f2;
+  --color-danger: #a33434;
+}
+
 :root {
   color-scheme: light;
   --ink: #13212a;
@@ -337,22 +350,31 @@ h1 {
   right: 10px;
   z-index: 1000;
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
+.map-tool-btn,
 .map-toggle {
   border: 0;
   border-radius: 999px;
-  padding: 8px 12px;
+  padding: 5px 9px;
   background: rgba(255, 255, 255, .95);
   color: var(--ink);
-  font-size: 12px;
-  font-weight: 750;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(20, 45, 50, .16);
+}
+.map-tool-btn:hover,
+.map-toggle:hover {
+  background: #f4f7f7;
 }
 .map-toggle.active {
   background: var(--brand);
   color: white;
+}
+.map-toggle.active:hover {
+  background: #0b5860;
 }
 .map-fallback {
   display: grid;

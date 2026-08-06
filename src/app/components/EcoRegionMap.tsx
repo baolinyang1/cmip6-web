@@ -2,7 +2,7 @@
 
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import L from "leaflet";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./eco-map.css";
@@ -10,6 +10,11 @@ import "./eco-map.css";
 export type MapViewState = {
   center: [number, number];
   zoom: number;
+};
+
+export const FULL_MAP_VIEW: MapViewState = {
+  center: [45, -100],
+  zoom: 3
 };
 
 export type RegionLabel = {
@@ -56,6 +61,13 @@ function pathStyle(code: string, selectedCode: string): L.PathOptions {
     weight: selected ? 2.4 : 0.55,
     opacity: 1,
     fillOpacity: selected ? 0.82 : 0.38
+  };
+}
+
+function copyView(view: MapViewState): MapViewState {
+  return {
+    center: [view.center[0], view.center[1]],
+    zoom: view.zoom
   };
 }
 
@@ -115,38 +127,57 @@ function MapResizeFix() {
   return null;
 }
 
+/** Keeps a live Leaflet map reference for toolbar actions outside the MapContainer tree. */
+function MapHandle({ mapRef }: { mapRef: MutableRefObject<L.Map | null> }) {
+  const map = useMap();
+  useEffect(() => {
+    mapRef.current = map;
+    return () => {
+      if (mapRef.current === map) mapRef.current = null;
+    };
+  }, [map, mapRef]);
+  return null;
+}
+
 function ViewPersistence({
   view,
-  onViewChange
+  onViewChange,
+  suppressSaveRef
 }: {
   view: MapViewState;
   onViewChange: (view: MapViewState) => void;
+  suppressSaveRef: MutableRefObject<boolean>;
 }) {
   const map = useMap();
   const onViewChangeRef = useRef(onViewChange);
-  const applyingRef = useRef(false);
 
   useEffect(() => {
     onViewChangeRef.current = onViewChange;
   }, [onViewChange]);
 
+  const centerLat = view.center[0];
+  const centerLng = view.center[1];
+  const zoom = view.zoom;
+
   useEffect(() => {
     const center = map.getCenter();
-    const zoom = map.getZoom();
+    const currentZoom = map.getZoom();
     const samePlace =
-      Math.abs(center.lat - view.center[0]) < 1e-6 &&
-      Math.abs(center.lng - view.center[1]) < 1e-6 &&
-      zoom === view.zoom;
+      Math.abs(center.lat - centerLat) < 1e-4 &&
+      Math.abs(center.lng - centerLng) < 1e-4 &&
+      currentZoom === zoom;
     if (samePlace) return;
 
-    applyingRef.current = true;
-    map.setView(view.center, view.zoom, { animate: false });
-    applyingRef.current = false;
-  }, [map, view.center, view.zoom]);
+    suppressSaveRef.current = true;
+    map.setView([centerLat, centerLng], zoom, { animate: false });
+    map.once("moveend", () => {
+      suppressSaveRef.current = false;
+    });
+  }, [map, centerLat, centerLng, zoom, suppressSaveRef]);
 
   useEffect(() => {
     const save = () => {
-      if (applyingRef.current) return;
+      if (suppressSaveRef.current) return;
       const center = map.getCenter();
       onViewChangeRef.current({
         center: [center.lat, center.lng],
@@ -159,7 +190,7 @@ function ViewPersistence({
       map.off("moveend", save);
       map.off("zoomend", save);
     };
-  }, [map]);
+  }, [map, suppressSaveRef]);
 
   return null;
 }
@@ -171,6 +202,7 @@ export default function EcoRegionMap({
   onShowEcoregionsChange,
   view,
   onViewChange,
+  onExitToInitialView,
   regionLabels = {},
   compact = false
 }: {
@@ -180,12 +212,16 @@ export default function EcoRegionMap({
   onShowEcoregionsChange: (show: boolean) => void;
   view: MapViewState;
   onViewChange: (view: MapViewState) => void;
+  /** Leave the chart workspace and restore the initial full-screen map layout. */
+  onExitToInitialView?: () => void;
   regionLabels?: Record<string, RegionLabel>;
   compact?: boolean;
 }) {
   const [data, setData] = useState<FeatureCollection<Geometry, EcoFeatureProps> | null>(null);
   const [loadError, setLoadError] = useState("");
   const geoJsonRef = useRef<L.GeoJSON | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
+  const suppressSaveRef = useRef(false);
   const selectedRef = useRef(selectedCode);
   const labelsRef = useRef(regionLabels);
 
@@ -211,6 +247,23 @@ export default function EcoRegionMap({
       ? [code, label.level1, label.level2, label.level3]
       : [code, fallbackName];
     return `<span class="eco-map-tooltip-body">${parts.map(escapeHtml).join("<br/>")}</span>`;
+  }
+
+  function resetToFullMap() {
+    const next = copyView(FULL_MAP_VIEW);
+    const map = mapRef.current;
+    if (map) {
+      suppressSaveRef.current = true;
+      map.stop();
+      map.setView(next.center, next.zoom, { animate: true });
+      map.once("moveend", () => {
+        suppressSaveRef.current = false;
+        onViewChange(copyView(next));
+      });
+    }
+    onViewChange(next);
+    // Restore the app's initial full-screen map layout (exit chart workspace).
+    onExitToInitialView?.();
   }
 
   useEffect(() => {
@@ -262,7 +315,12 @@ export default function EcoRegionMap({
         className="eco-map-canvas"
       >
         <MapResizeFix />
-        <ViewPersistence view={view} onViewChange={onViewChange} />
+        <MapHandle mapRef={mapRef} />
+        <ViewPersistence
+          view={view}
+          onViewChange={onViewChange}
+          suppressSaveRef={suppressSaveRef}
+        />
         {/* Street-style basemap with city/place labels (OSM / CARTO Voyager). */}
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -306,9 +364,20 @@ export default function EcoRegionMap({
       </MapContainer>
 
       <div className="map-toolbar">
+        {compact ? (
+          <button
+            type="button"
+            className="map-tool-btn"
+            onClick={resetToFullMap}
+            title="Back to the initial full-screen map"
+            aria-label="Back to the initial full-screen map"
+          >
+            Full map
+          </button>
+        ) : null}
         <button
           type="button"
-          className={`map-toggle${showEcoregions ? " active" : ""}`}
+          className={`map-tool-btn map-toggle${showEcoregions ? " active" : ""}`}
           onClick={() => onShowEcoregionsChange(!showEcoregions)}
           aria-pressed={showEcoregions}
         >

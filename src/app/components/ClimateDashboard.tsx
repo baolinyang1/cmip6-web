@@ -418,6 +418,12 @@ export default function ClimateDashboard() {
       : [...previous, scenario]);
   };
 
+  const exitToInitialView = useCallback(() => {
+    setWorkspaceActive(false);
+    setSidebarOpen(true);
+    setMapView({ center: [45, -100], zoom: 3 });
+  }, []);
+
   const canGenerate = !ecoLoading && !!selectedEco && !generating;
 
   return (
@@ -594,6 +600,7 @@ export default function ClimateDashboard() {
                   onShowEcoregionsChange={setShowEcoregions}
                   view={mapView}
                   onViewChange={setMapView}
+                  onExitToInitialView={exitToInitialView}
                   regionLabels={regionLabels}
                   compact
                 />
@@ -626,6 +633,7 @@ export default function ClimateDashboard() {
                   onShowEcoregionsChange={setShowEcoregions}
                   view={mapView}
                   onViewChange={setMapView}
+                  onExitToInitialView={exitToInitialView}
                   regionLabels={regionLabels}
                 />
               </div>

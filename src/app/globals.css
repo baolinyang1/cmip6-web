@@ -73,7 +73,7 @@ h1 {
   letter-spacing: 0;
   line-height: 1.35;
   color: var(--muted);
-  max-width: 48em;
+  max-width: 64em;
 }
 .subtitle {
   margin: clamp(4px, 0.8vh, 10px) 0 0;
@@ -121,6 +121,12 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex: 0 0 auto;
+}
+.controls-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   flex: 0 0 auto;
 }
 .controls h2 {
@@ -321,7 +327,7 @@ h1 {
 .map-card {
   margin-top: 8px;
   flex: 1 1 auto;
-  min-height: 160px;
+  min-height: 280px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -342,6 +348,9 @@ h1 {
   min-height: 0;
   width: 100%;
   height: auto;
+}
+.eco-map-compact {
+  min-height: 240px;
 }
 .eco-map-canvas { height: 100%; width: 100%; background: #e7eef0; }
 .map-toolbar {

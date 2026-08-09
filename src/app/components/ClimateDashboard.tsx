@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Papa from "papaparse";
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
 import ChartWindow, {
   COLLAPSED_HEIGHT,
@@ -82,6 +82,43 @@ const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
   }
 };
 
+const USER_GUIDE_STEPS = [
+  {
+    title: "Set your options",
+    body: "In Controls, choose a climate variable (temperature or precipitation), a season, and which SSP scenarios to include. Tap the ? next to a label if you want a plain-language explanation."
+  },
+  {
+    title: "Choose an ecoregion",
+    body: "Pick a Level III ecoregion from the dropdown, or turn on Ecoregions on the map and click a region. The chart will use that area only."
+  },
+  {
+    title: "Generate a chart",
+    body: "Click Generate chart. A plot opens in the chart workspace so you can compare models, means, and scenario spreads."
+  },
+  {
+    title: "Explore and compare",
+    body: "Generate more charts to compare. Collapse, expand, or remove them as needed. Use Full map on the sidebar map anytime to return to this home map view."
+  }
+] as const;
+
+const GUIDE_STORAGE_KEY = "cmip6-user-guide-dismissed";
+
+function subscribeGuideStorage() {
+  return () => {};
+}
+
+function getGuideDismissedSnapshot() {
+  try {
+    return sessionStorage.getItem(GUIDE_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function getGuideDismissedServerSnapshot() {
+  return false;
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
@@ -154,6 +191,13 @@ export default function ClimateDashboard() {
   const [workspaceActive, setWorkspaceActive] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [helpTopic, setHelpTopic] = useState<HelpTopic | null>(null);
+  const guideDismissed = useSyncExternalStore(
+    subscribeGuideStorage,
+    getGuideDismissedSnapshot,
+    getGuideDismissedServerSnapshot
+  );
+  const [guideOverride, setGuideOverride] = useState<boolean | null>(null);
+  const guideOpen = guideOverride ?? !guideDismissed;
   const idBase = useId();
   const chartCountRef = useRef(0);
   const zCounterRef = useRef(100);
@@ -161,6 +205,16 @@ export default function ClimateDashboard() {
 
   const toggleHelp = useCallback((topic: HelpTopic) => {
     setHelpTopic((current) => (current === topic ? null : topic));
+  }, []);
+
+  const setGuideOpenAndRemember = useCallback((open: boolean) => {
+    setGuideOverride(open);
+    try {
+      if (open) sessionStorage.removeItem(GUIDE_STORAGE_KEY);
+      else sessionStorage.setItem(GUIDE_STORAGE_KEY, "1");
+    } catch {
+      // ignore storage failures
+    }
   }, []);
 
   useEffect(() => {
@@ -448,17 +502,68 @@ export default function ClimateDashboard() {
           <aside className="panel controls">
             <div className="controls-head">
               <h2>Controls</h2>
-              {workspaceActive ? (
+              <div className="controls-head-actions">
                 <button
                   type="button"
-                  className="icon-btn"
-                  aria-label="Hide controls"
-                  onClick={() => setSidebarOpen(false)}
+                  className={`cursor-pointer text-[11px] font-bold tracking-wide rounded-full px-2.5 py-1 border border-line bg-white text-ink hover:bg-brand-soft ${guideOpen ? "bg-brand-soft text-brand border-brand/30" : ""}`}
+                  aria-expanded={guideOpen}
+                  aria-controls={`${idBase}-user-guide`}
+                  onClick={() => setGuideOpenAndRemember(!guideOpen)}
                 >
-                  ×
+                  User guide
                 </button>
-              ) : null}
+                {workspaceActive ? (
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    aria-label="Hide controls"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
             </div>
+
+            {guideOpen ? (
+              <div
+                id={`${idBase}-user-guide`}
+                className="mt-2 rounded-[10px] border border-line bg-brand-soft/50 px-2.5 py-2.5"
+                role="region"
+                aria-label="User guide"
+              >
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <div>
+                    <p className="m-0 text-[12px] font-bold text-ink">How to get started</p>
+                    <p className="m-0 mt-0.5 text-[11px] leading-snug text-muted">
+                      Follow these steps to build your first chart.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    aria-label="Dismiss user guide"
+                    title="Dismiss"
+                    onClick={() => setGuideOpenAndRemember(false)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <ol className="m-0 flex list-none flex-col gap-2 p-0">
+                  {USER_GUIDE_STEPS.map((step, index) => (
+                    <li key={step.title} className="flex gap-2">
+                      <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="m-0 text-[11px] font-bold text-ink">{step.title}</p>
+                        <p className="m-0 mt-0.5 text-[11px] leading-snug text-muted">{step.body}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
 
             <div className="control-group">
               <div className="control-label-row">

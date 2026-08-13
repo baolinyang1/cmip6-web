@@ -34,10 +34,12 @@ export function normalize(value: unknown): string {
 
 export function findHeader(headers: string[], candidates: string[]): string | undefined {
   const lower = new Map(headers.map((h) => [h.trim().toLowerCase(), h]));
+  
   for (const candidate of candidates) {
     const exact = lower.get(candidate.toLowerCase());
     if (exact) return exact;
   }
+
   return headers.find((header) => {
     const h = header.toLowerCase();
     return candidates.some((candidate) => h.includes(candidate.toLowerCase()));

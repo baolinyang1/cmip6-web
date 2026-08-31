@@ -1,6 +1,14 @@
 export type CsvRow = Record<string, string | number | null | undefined>;
-export type Variable = "tas" | "pr";
 export type Season = "annual" | "winter" | "spring" | "summer" | "fall";
+
+export const VARIABLE_OPTIONS = [
+  { id: "tas", label: "Mean temperature", csv: "/data/ecoregion_25yr_tas.csv" },
+  { id: "tasmax", label: "Max temperature", csv: "/data/ecoregion_25yr_tasmax.csv" },
+  { id: "tasmin", label: "Min temperature", csv: "/data/ecoregion_25yr_tasmin.csv" },
+  { id: "pr", label: "Precipitation", csv: "/data/ecoregion_25yr_pr.csv" }
+] as const;
+
+export type Variable = (typeof VARIABLE_OPTIONS)[number]["id"];
 
 export type ChartSnapshot = {
   variable: Variable;
@@ -21,6 +29,15 @@ export const X_LABELS = [
 
 export const X_POSITIONS = [0, 6, 7, 8, 9, 12, 13, 14, 15, 18, 19, 20, 21];
 
+/** UI season -> tidy-CSV season labels (meteorological). */
+export const SEASON_ALIASES: Record<Season, string[]> = {
+  annual: ["annual"],
+  winter: ["winter", "djf"],
+  spring: ["spring", "mam"],
+  summer: ["summer", "jja"],
+  fall: ["fall", "autumn", "son"]
+};
+
 const SCENARIO_COLORS: Record<string, string> = {
   ssp126: "#d94c4c",
   ssp245: "#3478c7",
@@ -34,7 +51,7 @@ export function normalize(value: unknown): string {
 
 export function findHeader(headers: string[], candidates: string[]): string | undefined {
   const lower = new Map(headers.map((h) => [h.trim().toLowerCase(), h]));
-  
+
   for (const candidate of candidates) {
     const exact = lower.get(candidate.toLowerCase());
     if (exact) return exact;
@@ -46,18 +63,28 @@ export function findHeader(headers: string[], candidates: string[]): string | un
   });
 }
 
-export function valueColumn(headers: string[], variable: Variable, season: Season): string | undefined {
-  const cap = season.charAt(0).toUpperCase() + season.slice(1);
-  return findHeader(headers, [
-    `Plot_index_${cap}_${variable}`,
-    `${cap}_${variable}`,
-    `${season}_${variable}`,
-    `${variable}_${season}`
-  ]);
+function seasonMatches(rowSeason: string, season: Season): boolean {
+  const value = normalize(rowSeason).toLowerCase();
+  return SEASON_ALIASES[season].includes(value);
+}
+
+function tidyMetricHeader(headers: string[], variable: Variable): string | undefined {
+  if (variable === "pr") {
+    return findHeader(headers, ["pct_change", "pctchange", "percent_change"]);
+  }
+  return findHeader(headers, ["delta"]);
 }
 
 function mean(values: number[]): number {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+export function isTemperatureVariable(variable: Variable): boolean {
+  return variable !== "pr";
+}
+
+export function csvPathForVariable(variable: Variable): string {
+  return VARIABLE_OPTIONS.find((option) => option.id === variable)?.csv ?? "";
 }
 
 export function schemaErrorFor(
@@ -65,20 +92,30 @@ export function schemaErrorFor(
   variable: Variable,
   season: Season
 ): string {
-  if (!rows.length) return "";
+  if (!rows.length) {
+    return `Could not load ${variableTitle(variable)} data. Check that ${csvPathForVariable(variable)} is available.`;
+  }
   const headers = Object.keys(rows[0]);
   const ecoHeader = findHeader(headers, ["Ecoregion", "EcoRegion", "EcoregionCode", "Code"]);
   const termHeader = findHeader(headers, ["Term", "Period", "TimePeriod"]);
   const scenarioHeader = findHeader(headers, ["Scenario", "SSP"]);
-  const metricHeader = valueColumn(headers, variable, season);
+  const seasonHeader = findHeader(headers, ["season"]);
+  const metricHeader = tidyMetricHeader(headers, variable);
   const missing = [
     !ecoHeader && "ecoregion column",
     !termHeader && "term/period column",
     !scenarioHeader && "scenario column",
-    !metricHeader && `${season} ${variable} value column`
+    !seasonHeader && "season column",
+    !metricHeader && (variable === "pr" ? "pct_change column" : "delta column")
   ].filter(Boolean);
-  if (!missing.length) return "";
-  return `CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
+  if (missing.length) {
+    return `CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
+  }
+  const hasSeason = rows.some((row) => seasonMatches(normalize(row[seasonHeader!]), season));
+  if (!hasSeason) {
+    return `No rows for season "${season}" (expected one of: ${SEASON_ALIASES[season].join(", ")}).`;
+  }
+  return "";
 }
 
 export function buildTraces(rows: CsvRow[], snapshot: ChartSnapshot): unknown[] {
@@ -88,10 +125,14 @@ export function buildTraces(rows: CsvRow[], snapshot: ChartSnapshot): unknown[] 
   const termHeader = findHeader(headers, ["Term", "Period", "TimePeriod"]);
   const scenarioHeader = findHeader(headers, ["Scenario", "SSP"]);
   const modelHeader = findHeader(headers, ["Model", "GCM", "Source_ID", "Climate_Model"]);
-  const metricHeader = valueColumn(headers, snapshot.variable, snapshot.season);
-  if (!ecoHeader || !termHeader || !scenarioHeader || !metricHeader) return [];
+  const seasonHeader = findHeader(headers, ["season"]);
+  const metricHeader = tidyMetricHeader(headers, snapshot.variable);
+  if (!ecoHeader || !termHeader || !scenarioHeader || !seasonHeader || !metricHeader) return [];
 
-  const selectedRows = rows.filter((row) => normalize(row[ecoHeader]) === snapshot.selectedEco);
+  const selectedRows = rows.filter((row) =>
+    normalize(row[ecoHeader]) === normalize(snapshot.selectedEco) &&
+    seasonMatches(normalize(row[seasonHeader]), snapshot.season)
+  );
   const output: unknown[] = [];
 
   const pastRows = selectedRows.filter((row) => normalize(row[termHeader]).toLowerCase() === "near-term past");
@@ -153,11 +194,20 @@ export function buildTraces(rows: CsvRow[], snapshot: ChartSnapshot): unknown[] 
 }
 
 export function yAxisTitle(variable: Variable): string {
-  return variable === "tas"
+  return isTemperatureVariable(variable)
     ? "Changes compared with the past (°C)"
     : "Changes compared with the past (%)";
 }
 
 export function variableTitle(variable: Variable): string {
-  return variable === "tas" ? "Mean temperature" : "Precipitation";
+  switch (variable) {
+    case "tas":
+      return "Mean temperature";
+    case "tasmax":
+      return "Max temperature";
+    case "tasmin":
+      return "Min temperature";
+    case "pr":
+      return "Precipitation";
+  }
 }

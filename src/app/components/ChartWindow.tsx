@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import type { Variable } from "./chartTraces";
-import { X_LABELS, X_POSITIONS, yAxisTitle } from "./chartTraces";
+import { X_LABELS, X_POSITIONS, isTemperatureVariable, yAxisTitle } from "./chartTraces";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -194,7 +194,7 @@ export default function ChartWindow({
                   },
                   yaxis: {
                     title: { text: yAxisTitle(chart.variable), font: { size: 11 } },
-                    range: chart.variable === "tas" ? [-5, 20] : undefined,
+                    range: isTemperatureVariable(chart.variable) ? [-5, 20] : undefined,
                     tickfont: { size: 10 },
                     gridcolor: "rgba(105,125,130,.18)",
                     zerolinecolor: "rgba(70,90,95,.35)"

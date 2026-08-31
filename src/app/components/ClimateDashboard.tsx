@@ -13,6 +13,7 @@ import ChartWindow, {
 import type { RegionLabel } from "./EcoRegionMap";
 import {
   buildTraces,
+  csvPathForVariable,
   normalize,
   schemaErrorFor,
   SCENARIOS,
@@ -21,6 +22,7 @@ import {
   type Variable,
   variableTitle
 } from "./chartTraces";
+import VariableTabs from "./VariableTabs";
 
 const EcoRegionMap = dynamic(() => import("./EcoRegionMap"), {
   ssr: false,
@@ -52,8 +54,8 @@ const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
     title: "Climate variable",
     body: [
       "This chooses what the chart measures. Values are changes compared with the near-term past baseline — not the absolute temperature or rainfall amount.",
-      "Temperature shows warming or cooling in degrees Celsius (°C). For example, +2°C means that period is about 2°C warmer than the near-term past for the same region.",
-      "Precipitation shows wetter or drier conditions as a percent (%). For example, +10% means about 10% more precipitation than the near-term past."
+      "Mean, max, and min temperature show warming or cooling in degrees Celsius (°C). Precipitation shows wetter or drier conditions as a percent (%).",
+      "Slide between the four tabs to pick the variable before generating a chart."
     ]
   },
   season: {
@@ -85,7 +87,7 @@ const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
 const USER_GUIDE_STEPS = [
   {
     title: "Set your options",
-    body: "In Controls, choose a climate variable (temperature or precipitation), a season, and which SSP scenarios to include. Tap the ? next to a label if you want a plain-language explanation."
+    body: "In Controls, slide the climate variable tabs (mean, max, min temp, or precipitation), pick a season, and choose SSP scenarios. Tap ? next to a label for more detail."
   },
   {
     title: "Choose an ecoregion",
@@ -181,7 +183,7 @@ export default function ClimateDashboard() {
   const [selectedEco, setSelectedEco] = useState("");
   const [enabledScenarios, setEnabledScenarios] = useState<string[]>([...SCENARIOS]);
   const [ecoregions, setEcoregions] = useState<EcoRegion[]>([]);
-  const [data, setData] = useState<Record<Variable, CsvRow[]>>({ tas: [], pr: [] });
+  const [data, setData] = useState<Partial<Record<Variable, CsvRow[]>>>({});
   const [ecoLoading, setEcoLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
@@ -263,16 +265,14 @@ export default function ClimateDashboard() {
     setError("");
     try {
       let nextData = data;
-      if (!data.tas.length || !data.pr.length) {
-        const [tasResult, prResult] = await Promise.all([
-          loadCsv(["/data/Ave25yearSpan_tas.csv", "/data/EcoregionAve25yearSpan_tas.csv"]),
-          loadCsv(["/data/Ave25yearSpan_pr.csv", "/data/EcoregionAve25yearSpan_pr.csv"])
-        ]);
-        nextData = { tas: tasResult.rows, pr: prResult.rows };
+      const csvPath = csvPathForVariable(variable);
+      if (!nextData[variable]?.length) {
+        const result = await loadCsv([csvPath]);
+        nextData = { ...nextData, [variable]: result.rows };
         setData(nextData);
       }
 
-      const rows = nextData[variable];
+      const rows = nextData[variable] ?? [];
       const schemaError = schemaErrorFor(rows, variable, season);
       if (schemaError) {
         setError(schemaError);
@@ -285,6 +285,10 @@ export default function ClimateDashboard() {
         selectedEco,
         enabledScenarios: [...enabledScenarios]
       });
+      if (!traces.length) {
+        setError(`No chart data for ${selectedEco} / ${season} / ${variable}. Try another region or season.`);
+        return;
+      }
       const region = ecoregions.find((item) => item.code === selectedEco);
       const index = chartCountRef.current;
       chartCountRef.current += 1;
@@ -586,10 +590,7 @@ export default function ClimateDashboard() {
                   ))}
                 </div>
               ) : null}
-              <div className="segmented">
-                <button className={variable === "tas" ? "active" : ""} onClick={() => setVariable("tas")}>Temperature</button>
-                <button className={variable === "pr" ? "active" : ""} onClick={() => setVariable("pr")}>Precipitation</button>
-              </div>
+              <VariableTabs value={variable} onChange={setVariable} />
             </div>
 
             <div className="control-group">

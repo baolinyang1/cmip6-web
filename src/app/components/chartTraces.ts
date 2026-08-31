@@ -2,10 +2,10 @@ export type CsvRow = Record<string, string | number | null | undefined>;
 export type Season = "annual" | "winter" | "spring" | "summer" | "fall";
 
 export const VARIABLE_OPTIONS = [
-  { id: "tas", label: "Mean temperature", csv: "/data/ecoregion_25yr_tas.csv" },
-  { id: "tasmax", label: "Max temperature", csv: "/data/ecoregion_25yr_tasmax.csv" },
-  { id: "tasmin", label: "Min temperature", csv: "/data/ecoregion_25yr_tasmin.csv" },
-  { id: "pr", label: "Precipitation", csv: "/data/ecoregion_25yr_pr.csv" }
+  { id: "tas", label: "Mean temperature", csv: "/data/EcoregionAve25yearSpan_tas.csv" },
+  { id: "tasmax", label: "Max temperature", csv: "/data/EcoregionAve25yearSpan_tasmax.csv" },
+  { id: "tasmin", label: "Min temperature", csv: "/data/EcoregionAve25yearSpan_tasmin.csv" },
+  { id: "pr", label: "Precipitation", csv: "/data/EcoregionAve25yearSpan_pr.csv" }
 ] as const;
 
 export type Variable = (typeof VARIABLE_OPTIONS)[number]["id"];
@@ -63,9 +63,41 @@ export function findHeader(headers: string[], candidates: string[]): string | un
   });
 }
 
+function isTidySchema(headers: string[]): boolean {
+  const seasonHeader = findHeader(headers, ["season"]);
+  const periodHeader = findHeader(headers, ["period", "term", "TimePeriod"]);
+  const deltaHeader = findHeader(headers, ["delta"]);
+  const pctHeader = findHeader(headers, ["pct_change", "pctchange", "percent_change"]);
+  return Boolean(seasonHeader && periodHeader && (deltaHeader || pctHeader));
+}
+
 function seasonMatches(rowSeason: string, season: Season): boolean {
   const value = normalize(rowSeason).toLowerCase();
   return SEASON_ALIASES[season].includes(value);
+}
+
+function variableSuffixes(variable: Variable): string[] {
+  if (variable === "pr") return ["pr", "Pr", "PR"];
+  return [variable];
+}
+
+/** Wide CSV: Plot_index_{Season}_{variable} columns (EcoregionAve25yearSpan_*). */
+export function valueColumn(headers: string[], variable: Variable, season: Season): string | undefined {
+  const cap = season.charAt(0).toUpperCase() + season.slice(1);
+  for (const suffix of variableSuffixes(variable)) {
+    const plotIndex = findHeader(headers, [`Plot_index_${cap}_${suffix}`]);
+    if (plotIndex) return plotIndex;
+  }
+  for (const suffix of variableSuffixes(variable)) {
+    const fallback = findHeader(headers, [
+      `${cap}_${suffix}`,
+      `${season}_${suffix}`,
+      `${suffix}_${season}`,
+      `Ave25yearSpan_${cap}_${suffix}`
+    ]);
+    if (fallback) return fallback;
+  }
+  return undefined;
 }
 
 function tidyMetricHeader(headers: string[], variable: Variable): string | undefined {
@@ -99,21 +131,36 @@ export function schemaErrorFor(
   const ecoHeader = findHeader(headers, ["Ecoregion", "EcoRegion", "EcoregionCode", "Code"]);
   const termHeader = findHeader(headers, ["Term", "Period", "TimePeriod"]);
   const scenarioHeader = findHeader(headers, ["Scenario", "SSP"]);
-  const seasonHeader = findHeader(headers, ["season"]);
-  const metricHeader = tidyMetricHeader(headers, variable);
+
+  if (isTidySchema(headers)) {
+    const seasonHeader = findHeader(headers, ["season"]);
+    const metricHeader = tidyMetricHeader(headers, variable);
+    const missing = [
+      !ecoHeader && "ecoregion column",
+      !termHeader && "term/period column",
+      !scenarioHeader && "scenario column",
+      !seasonHeader && "season column",
+      !metricHeader && (variable === "pr" ? "pct_change column" : "delta column")
+    ].filter(Boolean);
+    if (missing.length) {
+      return `CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
+    }
+    const hasSeason = rows.some((row) => seasonMatches(normalize(row[seasonHeader!]), season));
+    if (!hasSeason) {
+      return `No rows for season "${season}" (expected one of: ${SEASON_ALIASES[season].join(", ")}).`;
+    }
+    return "";
+  }
+
+  const metricHeader = valueColumn(headers, variable, season);
   const missing = [
     !ecoHeader && "ecoregion column",
     !termHeader && "term/period column",
     !scenarioHeader && "scenario column",
-    !seasonHeader && "season column",
-    !metricHeader && (variable === "pr" ? "pct_change column" : "delta column")
+    !metricHeader && `Plot_index_${season}_${variable} value column`
   ].filter(Boolean);
   if (missing.length) {
     return `CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
-  }
-  const hasSeason = rows.some((row) => seasonMatches(normalize(row[seasonHeader!]), season));
-  if (!hasSeason) {
-    return `No rows for season "${season}" (expected one of: ${SEASON_ALIASES[season].join(", ")}).`;
   }
   return "";
 }
@@ -125,14 +172,22 @@ export function buildTraces(rows: CsvRow[], snapshot: ChartSnapshot): unknown[] 
   const termHeader = findHeader(headers, ["Term", "Period", "TimePeriod"]);
   const scenarioHeader = findHeader(headers, ["Scenario", "SSP"]);
   const modelHeader = findHeader(headers, ["Model", "GCM", "Source_ID", "Climate_Model"]);
-  const seasonHeader = findHeader(headers, ["season"]);
-  const metricHeader = tidyMetricHeader(headers, snapshot.variable);
-  if (!ecoHeader || !termHeader || !scenarioHeader || !seasonHeader || !metricHeader) return [];
+  if (!ecoHeader || !termHeader || !scenarioHeader) return [];
 
-  const selectedRows = rows.filter((row) =>
-    normalize(row[ecoHeader]) === normalize(snapshot.selectedEco) &&
-    seasonMatches(normalize(row[seasonHeader]), snapshot.season)
-  );
+  const tidy = isTidySchema(headers);
+  const seasonHeader = tidy ? findHeader(headers, ["season"]) : undefined;
+  const metricHeader = tidy
+    ? tidyMetricHeader(headers, snapshot.variable)
+    : valueColumn(headers, snapshot.variable, snapshot.season);
+  if (!metricHeader) return [];
+  if (tidy && !seasonHeader) return [];
+
+  let selectedRows = rows.filter((row) => normalize(row[ecoHeader]) === normalize(snapshot.selectedEco));
+  if (tidy) {
+    selectedRows = selectedRows.filter((row) =>
+      seasonMatches(normalize(row[seasonHeader!]), snapshot.season)
+    );
+  }
   const output: unknown[] = [];
 
   const pastRows = selectedRows.filter((row) => normalize(row[termHeader]).toLowerCase() === "near-term past");

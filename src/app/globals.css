@@ -385,6 +385,10 @@ h1 {
 .map-toggle.active:hover {
   background: #0b5860;
 }
+.eco-map:not(.eco-map-compact) .map-toggle {
+  padding: 8px 14px;
+  font-size: 13px;
+}
 .map-fallback {
   display: grid;
   place-items: center;

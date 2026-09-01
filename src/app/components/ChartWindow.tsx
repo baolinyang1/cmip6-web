@@ -2,8 +2,9 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
-import type { Variable } from "./chartTraces";
+import type { ChartKind, Variable } from "./chartTraces";
 import { X_LABELS, X_POSITIONS, isTemperatureVariable, yAxisTitle } from "./chartTraces";
+import type { ClimateIndex } from "./indexTraces";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -11,11 +12,17 @@ export const MIN_WINDOW_WIDTH = 420;
 export const MIN_WINDOW_HEIGHT = 300;
 export const COLLAPSED_HEIGHT = 48;
 
+export type ChartMetric =
+  | { source: "variable"; id: Variable }
+  | { source: "index"; id: ClimateIndex };
+
 export type ChartWindowModel = {
   id: string;
   title: string;
   subtitle: string;
-  variable: Variable;
+  metric: ChartMetric;
+  chartKind: ChartKind;
+  yAxisLabel?: string;
   traces: unknown[];
   x: number;
   y: number;
@@ -27,6 +34,87 @@ export type ChartWindowModel = {
   savedWidth?: number;
   savedHeight?: number;
 };
+
+const PLOT_FONT = { family: "Inter, system-ui, sans-serif", color: "#203039", size: 11 };
+const GRID = "rgba(105,125,130,.13)";
+
+function quartersLayout(chart: ChartWindowModel, width: number, height: number) {
+  const variable = chart.metric.source === "variable" ? chart.metric.id : "tas";
+  return {
+    width,
+    height,
+    autosize: false,
+    margin: { l: 58, r: 16, t: 46, b: 96 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: PLOT_FONT,
+    hovermode: "closest" as const,
+    violinmode: "overlay" as const,
+    xaxis: {
+      tickmode: "array" as const,
+      tickvals: X_POSITIONS,
+      ticktext: X_LABELS,
+      tickangle: -45,
+      range: [-1.2, 22.2],
+      fixedrange: false,
+      tickfont: { size: 9 },
+      gridcolor: GRID,
+      zeroline: false
+    },
+    yaxis: {
+      title: { text: yAxisTitle(variable), font: { size: 11 } },
+      range: isTemperatureVariable(variable) ? [-5, 20] : undefined,
+      tickfont: { size: 10 },
+      gridcolor: "rgba(105,125,130,.18)",
+      zerolinecolor: "rgba(70,90,95,.35)"
+    },
+    legend: {
+      orientation: "h" as const,
+      x: 0,
+      xanchor: "left" as const,
+      y: 1.03,
+      yanchor: "bottom" as const,
+      font: { size: 10 }
+    }
+  };
+}
+
+function timeseriesLayout(chart: ChartWindowModel, width: number, height: number) {
+  return {
+    width,
+    height,
+    autosize: false,
+    margin: { l: 58, r: 16, t: 56, b: 52 },
+    paper_bgcolor: "rgba(0,0,0,0)",
+    plot_bgcolor: "rgba(0,0,0,0)",
+    font: PLOT_FONT,
+    hovermode: "x unified" as const,
+    xaxis: {
+      title: { text: "Year", font: { size: 11 } },
+      tickfont: { size: 10 },
+      gridcolor: GRID,
+      zeroline: false,
+      dtick: 5
+    },
+    yaxis: {
+      title: { text: chart.yAxisLabel ?? "Number of events", font: { size: 11 } },
+      tickfont: { size: 10 },
+      gridcolor: "rgba(105,125,130,.18)",
+      zerolinecolor: "rgba(70,90,95,.35)"
+    },
+    legend: {
+      orientation: "h" as const,
+      x: 0,
+      xanchor: "left" as const,
+      y: 1.04,
+      yanchor: "bottom" as const,
+      font: { size: 9 },
+      bgcolor: "rgba(255,255,255,.85)",
+      bordercolor: "rgba(208,222,225,.9)",
+      borderwidth: 1
+    }
+  };
+}
 
 type ChartWindowProps = {
   chart: ChartWindowModel;
@@ -171,48 +259,16 @@ export default function ChartWindow({
             {plotSize.width > 0 ? (
               <Plot
                 data={chart.traces as never[]}
-                layout={{
-                  width: plotSize.width,
-                  height: plotSize.height,
-                  autosize: false,
-                  margin: { l: 58, r: 16, t: 46, b: 96 },
-                  paper_bgcolor: "rgba(0,0,0,0)",
-                  plot_bgcolor: "rgba(0,0,0,0)",
-                  font: { family: "Inter, system-ui, sans-serif", color: "#203039", size: 11 },
-                  hovermode: "closest",
-                  violinmode: "overlay",
-                  xaxis: {
-                    tickmode: "array",
-                    tickvals: X_POSITIONS,
-                    ticktext: X_LABELS,
-                    tickangle: -45,
-                    range: [-1.2, 22.2],
-                    fixedrange: false,
-                    tickfont: { size: 9 },
-                    gridcolor: "rgba(105,125,130,.13)",
-                    zeroline: false
-                  },
-                  yaxis: {
-                    title: { text: yAxisTitle(chart.variable), font: { size: 11 } },
-                    range: isTemperatureVariable(chart.variable) ? [-5, 20] : undefined,
-                    tickfont: { size: 10 },
-                    gridcolor: "rgba(105,125,130,.18)",
-                    zerolinecolor: "rgba(70,90,95,.35)"
-                  },
-                  legend: {
-                    orientation: "h",
-                    x: 0,
-                    xanchor: "left",
-                    y: 1.03,
-                    yanchor: "bottom",
-                    font: { size: 10 }
-                  }
-                }}
+                layout={
+                  chart.chartKind === "timeseries"
+                    ? timeseriesLayout(chart, plotSize.width, plotSize.height)
+                    : quartersLayout(chart, plotSize.width, plotSize.height)
+                }
                 config={{
                   displaylogo: false,
                   toImageButtonOptions: {
                     format: "png",
-                    filename: `Quarters_${chart.title}_${chart.subtitle}`
+                    filename: `${chart.chartKind === "timeseries" ? "TRC" : "Quarters"}_${chart.title}_${chart.subtitle}`
                       .replaceAll(" · ", "_")
                       .replaceAll(" ", "_")
                       .replace(/[<>:"/\\|?*]/g, "")

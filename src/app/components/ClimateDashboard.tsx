@@ -22,6 +22,18 @@ import {
   type Variable,
   variableTitle
 } from "./chartTraces";
+import {
+  buildIndexTraces,
+  climateIndexIntroLines,
+  csvPathForIndex,
+  indexChartTitle,
+  indexHelpLines,
+  indexSchemaErrorFor,
+  INDEX_OPTIONS,
+  INDEX_Y_AXIS_TITLE,
+  type ClimateIndex
+} from "./indexTraces";
+import IndexTabs from "./IndexTabs";
 import VariableTabs from "./VariableTabs";
 
 const EcoRegionMap = dynamic(() => import("./EcoRegionMap"), {
@@ -47,17 +59,10 @@ const COLLAPSED_ROW_GAP = 8;
 /** Top inset inside the stage (toolbar is already in-flow above the stage). */
 const STAGE_TOP = GRID_GAP;
 
-type HelpTopic = "variable" | "season" | "ecoregion" | "scenarios";
+type HelpTopic = "variable" | "index" | "season" | "ecoregion" | "scenarios";
+type ChartSource = "variable" | "index";
 
-const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
-  variable: {
-    title: "Climate variable",
-    body: [
-      "This chooses what the chart measures. Values are changes compared with the near-term past baseline — not the absolute temperature or rainfall amount.",
-      "Mean, max, and min temperature show warming or cooling in degrees Celsius (°C). Precipitation shows wetter or drier conditions as a percent (%).",
-      "Slide between the four tabs to pick the variable before generating a chart."
-    ]
-  },
+const CONTROL_HELP: Record<Exclude<HelpTopic, "variable" | "index">, { title: string; body: string[] }> = {
   season: {
     title: "Season",
     body: [
@@ -87,7 +92,7 @@ const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
 const USER_GUIDE_STEPS = [
   {
     title: "Set your options",
-    body: "In Controls, slide the climate variable tabs (mean, max, min temp, or precipitation), pick a season, and choose SSP scenarios. Tap ? next to a label for more detail."
+    body: "In Controls, pick a climate variable or climate index, choose a season for variables, and select SSP scenarios. Tap ? next to a label for more detail."
   },
   {
     title: "Choose an ecoregion",
@@ -178,12 +183,15 @@ async function loadCsv(urls: string[]): Promise<{ rows: CsvRow[]; url: string }>
 }
 
 export default function ClimateDashboard() {
+  const [chartSource, setChartSource] = useState<ChartSource>("variable");
   const [variable, setVariable] = useState<Variable>("tas");
+  const [climateIndex, setClimateIndex] = useState<ClimateIndex>("trcmax");
   const [season, setSeason] = useState<Season>("annual");
   const [selectedEco, setSelectedEco] = useState("");
   const [enabledScenarios, setEnabledScenarios] = useState<string[]>([...SCENARIOS]);
   const [ecoregions, setEcoregions] = useState<EcoRegion[]>([]);
   const [data, setData] = useState<Partial<Record<Variable, CsvRow[]>>>({});
+  const [indexData, setIndexData] = useState<Partial<Record<ClimateIndex, CsvRow[]>>>({});
   const [ecoLoading, setEcoLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
@@ -260,10 +268,103 @@ export default function ClimateDashboard() {
     return map;
   }, [ecoregions]);
 
+  const variableHelp = useMemo(() => [
+    "Climate variables are the raw CMIP6 fields used in this tool — mean, max, and min temperature and precipitation.",
+    "Charts show changes compared with the near-term past baseline, not absolute amounts.",
+    "Mean, max, and min temperature are in degrees Celsius (°C). Precipitation is shown as a percent (%).",
+    "Slide between the tabs to pick the variable before generating a chart."
+  ], []);
+
+  const indexHelp = useMemo(() => [
+    ...climateIndexIntroLines(),
+    ...indexHelpLines(climateIndex)
+  ], [climateIndex]);
+
+  const selectVariable = useCallback((next: Variable) => {
+    setChartSource("variable");
+    setVariable(next);
+  }, []);
+
+  const selectClimateIndex = useCallback((next: ClimateIndex) => {
+    setChartSource("index");
+    setClimateIndex(next);
+  }, []);
+
   const handleGenerate = useCallback(async () => {
     setGenerating(true);
     setError("");
     try {
+      const indexChart = chartSource === "index";
+
+      if (indexChart) {
+        let nextIndexData = indexData;
+        const csvPath = csvPathForIndex(climateIndex);
+        if (!nextIndexData[climateIndex]?.length) {
+          const result = await loadCsv([csvPath]);
+          const loaded: Partial<Record<ClimateIndex, CsvRow[]>> = { ...nextIndexData };
+          for (const option of INDEX_OPTIONS) {
+            if (option.csv === csvPath) loaded[option.id] = result.rows;
+          }
+          nextIndexData = loaded;
+          setIndexData(loaded);
+        }
+
+        const rows = nextIndexData[climateIndex] ?? [];
+        const schemaError = indexSchemaErrorFor(rows, selectedEco);
+        if (schemaError) {
+          setError(schemaError);
+          return;
+        }
+
+        const traces = buildIndexTraces(rows, {
+          index: climateIndex,
+          selectedEco,
+          enabledScenarios: [...enabledScenarios]
+        });
+        if (!traces.length) {
+          setError(`No chart data for ${selectedEco} / ${climateIndex}. Try another region or SSP selection.`);
+          return;
+        }
+
+        const region = ecoregions.find((item) => item.code === selectedEco);
+        const chartIndex = chartCountRef.current;
+        chartCountRef.current += 1;
+
+        flushSync(() => setWorkspaceActive(true));
+
+        const stage = workspaceRef.current;
+        const stageW = stage?.clientWidth ?? 900;
+        const stageH = stage?.clientHeight ?? 640;
+        const width = Math.min(DEFAULT_WIDTH, Math.max(MIN_WINDOW_WIDTH, stageW - GRID_GAP * 2));
+        const height = Math.min(DEFAULT_HEIGHT, Math.max(MIN_WINDOW_HEIGHT, stageH - HEADER_SPACE - GRID_GAP));
+        const slot = charts.length;
+        const { x, y } = layoutSlot(slot, stageW, stageH, width);
+
+        zCounterRef.current += 1;
+
+        setCharts((previous) => [
+          ...previous,
+          {
+            id: `${idBase}-${chartIndex}`,
+            title: indexChartTitle(climateIndex),
+            subtitle: region
+              ? `${selectedEco} · ${region.level1} · ${region.level2} · ${region.level3}`
+              : selectedEco,
+            metric: { source: "index", id: climateIndex },
+            chartKind: "timeseries",
+            yAxisLabel: INDEX_Y_AXIS_TITLE,
+            traces,
+            x,
+            y,
+            width,
+            height,
+            zIndex: zCounterRef.current,
+            collapsed: false
+          }
+        ]);
+        return;
+      }
+
       let nextData = data;
       const csvPath = csvPathForVariable(variable);
       if (!nextData[variable]?.length) {
@@ -313,7 +414,8 @@ export default function ClimateDashboard() {
           subtitle: region
             ? `${selectedEco} · ${region.level1} · ${region.level2} · ${region.level3}`
             : selectedEco,
-          variable,
+          metric: { source: "variable", id: variable },
+          chartKind: "quarters",
           traces,
           x,
           y,
@@ -328,7 +430,7 @@ export default function ClimateDashboard() {
     } finally {
       setGenerating(false);
     }
-  }, [data, variable, season, selectedEco, enabledScenarios, ecoregions, idBase, charts.length]);
+  }, [chartSource, climateIndex, data, indexData, variable, season, selectedEco, enabledScenarios, ecoregions, idBase, charts.length]);
 
   const closeChart = useCallback((id: string) => {
     setCharts((previous) => previous.filter((chart) => chart.id !== id));
@@ -569,7 +671,7 @@ export default function ClimateDashboard() {
               </div>
             ) : null}
 
-            <div className="control-group">
+            <div className={`control-group control-picker${chartSource === "variable" ? " control-picker-active" : ""}`}>
               <div className="control-label-row">
                 <label>Climate variable</label>
                 <button
@@ -585,14 +687,39 @@ export default function ClimateDashboard() {
               </div>
               {helpTopic === "variable" ? (
                 <div className="control-help" role="region" aria-label="Climate variable help">
-                  {CONTROL_HELP.variable.body.map((paragraph) => (
+                  {variableHelp.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
               ) : null}
-              <VariableTabs value={variable} onChange={setVariable} />
+              <VariableTabs value={variable} onChange={selectVariable} />
             </div>
 
+            <div className={`control-group control-picker${chartSource === "index" ? " control-picker-active" : ""}`}>
+              <div className="control-label-row">
+                <label>Climate indices</label>
+                <button
+                  type="button"
+                  className={`help-icon${helpTopic === "index" ? " active" : ""}`}
+                  aria-label="Help: Climate index"
+                  aria-expanded={helpTopic === "index"}
+                  title="Help"
+                  onClick={() => toggleHelp("index")}
+                >
+                  ?
+                </button>
+              </div>
+              {helpTopic === "index" ? (
+                <div className="control-help" role="region" aria-label="Climate indices help">
+                  {indexHelp.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : null}
+              <IndexTabs value={climateIndex} onChange={selectClimateIndex} />
+            </div>
+
+            {chartSource === "variable" ? (
             <div className="control-group">
               <div className="control-label-row">
                 <label htmlFor="season">Season</label>
@@ -618,6 +745,7 @@ export default function ClimateDashboard() {
                 {SEASONS.map((item) => <option key={item} value={item}>{item[0].toUpperCase() + item.slice(1)}</option>)}
               </select>
             </div>
+            ) : null}
 
             <div className="control-group">
               <div className="control-label-row">

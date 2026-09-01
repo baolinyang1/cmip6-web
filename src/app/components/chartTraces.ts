@@ -1,5 +1,6 @@
 export type CsvRow = Record<string, string | number | null | undefined>;
 export type Season = "annual" | "winter" | "spring" | "summer" | "fall";
+export type ChartKind = "quarters" | "timeseries";
 
 export const VARIABLE_OPTIONS = [
   { id: "tas", label: "Mean temperature", csv: "/data/EcoregionAve25yearSpan_tas.csv" },

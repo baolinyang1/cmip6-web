@@ -49,7 +49,6 @@ type EcoRegion = {
 };
 
 const SEASONS: Season[] = ["annual", "winter", "spring", "summer", "fall"];
-const DEFAULT_WIDTH = 750;
 const DEFAULT_HEIGHT = 500;
 const GRID_GAP = 14;
 const HEADER_SPACE = 72;
@@ -152,6 +151,67 @@ function layoutSlot(
     x: clamp(x, GRID_GAP, Math.max(GRID_GAP, stageW - width - GRID_GAP)),
     y: clamp(y, HEADER_SPACE, maxY)
   };
+}
+
+/** clientWidth reads 0 mid-reflow, which would shrink charts to the minimum. */
+function stageWidthOf(stage: HTMLElement | null): number {
+  return stage?.clientWidth || 900;
+}
+
+/** Index charts span the workspace; variable charts sit two per row. */
+function rowWidth(stageW: number, indexChart: boolean): number {
+  return indexChart
+    ? Math.max(MIN_WINDOW_WIDTH, stageW - GRID_GAP * 2)
+    : Math.max(MIN_WINDOW_WIDTH, Math.floor((stageW - GRID_GAP * 3) / 2));
+}
+
+function newChartPlacement(
+  slot: number,
+  stageW: number,
+  stageH: number,
+  indexChart: boolean
+): { x: number; y: number; width: number; height: number } {
+  const height = Math.min(DEFAULT_HEIGHT, Math.max(MIN_WINDOW_HEIGHT, stageH - HEADER_SPACE - GRID_GAP));
+  const width = rowWidth(stageW, indexChart);
+  const { y } = layoutSlot(slot, stageW, stageH, width);
+  const x = indexChart ? GRID_GAP : GRID_GAP + (slot % 2) * (width + GRID_GAP);
+  return { x, y, width, height };
+}
+
+function layoutExpandedCharts(charts: ChartWindowModel[], stageW: number): ChartWindowModel[] {
+  const height = DEFAULT_HEIGHT;
+  let y = STAGE_TOP;
+  let column = 0;
+
+  return charts.map((chart, index) => {
+    const indexChart = chart.metric.source === "index";
+    // An index chart needs a clean row, so close out any half-filled variable row.
+    if (indexChart && column === 1) {
+      y += height + GRID_GAP;
+      column = 0;
+    }
+
+    const width = rowWidth(stageW, indexChart);
+    const placed = {
+      ...chart,
+      collapsed: false,
+      savedWidth: undefined,
+      savedHeight: undefined,
+      width,
+      height,
+      x: GRID_GAP + column * (width + GRID_GAP),
+      y,
+      zIndex: 100 + index
+    };
+
+    if (indexChart || column === 1) {
+      y += height + GRID_GAP;
+      column = 0;
+    } else {
+      column = 1;
+    }
+    return placed;
+  });
 }
 
 async function loadCsv(urls: string[]): Promise<{ rows: CsvRow[]; url: string }> {
@@ -333,12 +393,13 @@ export default function ClimateDashboard() {
         flushSync(() => setWorkspaceActive(true));
 
         const stage = workspaceRef.current;
-        const stageW = stage?.clientWidth ?? 900;
-        const stageH = stage?.clientHeight ?? 640;
-        const width = Math.min(DEFAULT_WIDTH, Math.max(MIN_WINDOW_WIDTH, stageW - GRID_GAP * 2));
-        const height = Math.min(DEFAULT_HEIGHT, Math.max(MIN_WINDOW_HEIGHT, stageH - HEADER_SPACE - GRID_GAP));
         const slot = charts.length;
-        const { x, y } = layoutSlot(slot, stageW, stageH, width);
+        const { x, y, width, height } = newChartPlacement(
+          slot,
+          stageWidthOf(stage),
+          stage?.clientHeight || 640,
+          true
+        );
 
         zCounterRef.current += 1;
 
@@ -397,12 +458,13 @@ export default function ClimateDashboard() {
       flushSync(() => setWorkspaceActive(true));
 
       const stage = workspaceRef.current;
-      const stageW = stage?.clientWidth ?? 900;
-      const stageH = stage?.clientHeight ?? 640;
-      const width = Math.min(DEFAULT_WIDTH, Math.max(MIN_WINDOW_WIDTH, stageW - GRID_GAP * 2));
-      const height = Math.min(DEFAULT_HEIGHT, Math.max(MIN_WINDOW_HEIGHT, stageH - HEADER_SPACE - GRID_GAP));
       const slot = charts.length;
-      const { x, y } = layoutSlot(slot, stageW, stageH, width);
+      const { x, y, width, height } = newChartPlacement(
+        slot,
+        stageWidthOf(stage),
+        stage?.clientHeight || 640,
+        false
+      );
 
       zCounterRef.current += 1;
 
@@ -437,8 +499,7 @@ export default function ClimateDashboard() {
   }, []);
 
   const toggleCollapse = useCallback((id: string) => {
-    const stage = workspaceRef.current;
-    const stageW = stage?.clientWidth ?? 0;
+    const stageW = stageWidthOf(workspaceRef.current);
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id) return chart;
       if (chart.collapsed) {
@@ -466,65 +527,28 @@ export default function ClimateDashboard() {
   }, []);
 
   const collapseAllCharts = useCallback(() => {
-    const stage = workspaceRef.current;
-    const stageW = stage?.clientWidth ?? 900;
-    const gap = GRID_GAP;
     const cols = 2;
-    const layoutWidth = Math.max(280, Math.floor((stageW - gap * (cols + 1)) / cols));
+    const stageW = stageWidthOf(workspaceRef.current);
+    const layoutWidth = Math.max(280, Math.floor((stageW - GRID_GAP * (cols + 1)) / cols));
 
-    setCharts((previous) => previous.map((chart, index) => {
-      const col = index % cols;
-      const row = Math.floor(index / cols);
-      const savedWidth = chart.collapsed
-        ? (chart.savedWidth ?? chart.width)
-        : chart.width;
-      const savedHeight = chart.collapsed
-        ? (chart.savedHeight ?? chart.height)
-        : chart.height;
-      return {
-        ...chart,
-        collapsed: true,
-        savedWidth,
-        savedHeight,
-        width: layoutWidth,
-        x: gap + col * (layoutWidth + gap),
-        y: STAGE_TOP + row * (COLLAPSED_HEIGHT + COLLAPSED_ROW_GAP),
-        zIndex: 100 + index
-      };
-    }));
+    setCharts((previous) => previous.map((chart, index) => ({
+      ...chart,
+      collapsed: true,
+      savedWidth: chart.collapsed ? chart.savedWidth : chart.width,
+      savedHeight: chart.collapsed ? chart.savedHeight : chart.height,
+      width: layoutWidth,
+      x: GRID_GAP + (index % cols) * (layoutWidth + GRID_GAP),
+      y: STAGE_TOP + Math.floor(index / cols) * (COLLAPSED_HEIGHT + COLLAPSED_ROW_GAP),
+      zIndex: 100 + index
+    })));
     workspaceRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const expandAllCharts = useCallback(() => {
+    // Close the sidebar first so the workspace reports its widened size.
     flushSync(() => setSidebarOpen(false));
-
     const stage = workspaceRef.current;
-    // Reflow so clientWidth reflects the full-width workspace after the sidebar closes.
-    void stage?.offsetWidth;
-    const stageW = stage?.clientWidth ?? 900;
-    const gap = GRID_GAP;
-    const cols = stageW >= MIN_WINDOW_WIDTH * 2 + gap * 3 ? 2 : 1;
-    const layoutWidth = Math.max(
-      MIN_WINDOW_WIDTH,
-      Math.floor((stageW - gap * (cols + 1)) / cols)
-    );
-    const layoutHeight = DEFAULT_HEIGHT;
-
-    setCharts((previous) => previous.map((chart, index) => {
-      const col = index % cols;
-      const row = Math.floor(index / cols);
-      return {
-        ...chart,
-        collapsed: false,
-        savedWidth: undefined,
-        savedHeight: undefined,
-        width: layoutWidth,
-        height: layoutHeight,
-        x: gap + col * (layoutWidth + gap),
-        y: STAGE_TOP + row * (layoutHeight + gap),
-        zIndex: 100 + index
-      };
-    }));
+    setCharts((previous) => layoutExpandedCharts(previous, stageWidthOf(stage)));
     stage?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -546,8 +570,7 @@ export default function ClimateDashboard() {
   }, []);
 
   const moveChart = useCallback((id: string, x: number, y: number) => {
-    const stage = workspaceRef.current;
-    const stageW = stage?.clientWidth ?? 0;
+    const stageW = stageWidthOf(workspaceRef.current);
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id) return chart;
       return {
@@ -560,8 +583,7 @@ export default function ClimateDashboard() {
   }, []);
 
   const resizeChart = useCallback((id: string, width: number, height: number) => {
-    const stage = workspaceRef.current;
-    const stageW = stage?.clientWidth ?? 0;
+    const stageW = stageWidthOf(workspaceRef.current);
     setCharts((previous) => previous.map((chart) => {
       if (chart.id !== id || chart.collapsed) return chart;
       return {

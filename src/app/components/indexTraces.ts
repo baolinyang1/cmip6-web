@@ -1,8 +1,22 @@
 import { normalize, SCENARIOS, type CsvRow } from "./chartTraces";
 
 export const INDEX_OPTIONS = [
-  { id: "trcmax", label: "TRCmax", column: "TRCmax", csv: "/data/EcoregionTRC_annual.csv" },
-  { id: "trcmaxmin", label: "TRCmaxmin", column: "TRCmaxmin", csv: "/data/EcoregionTRC_annual.csv" }
+  {
+    id: "trcmax",
+    label: "TRCmax",
+    column: "TRCmax",
+    minColumn: "TRCmax_min",
+    maxColumn: "TRCmax_max",
+    csv: "/data/EcoregionTRC_annual.csv"
+  },
+  {
+    id: "trcmaxmin",
+    label: "TRCmaxmin",
+    column: "TRCmaxmin",
+    minColumn: "TRCmaxmin_min",
+    maxColumn: "TRCmaxmin_max",
+    csv: "/data/EcoregionTRC_annual.csv"
+  }
 ] as const;
 
 export type ClimateIndex = (typeof INDEX_OPTIONS)[number]["id"];
@@ -44,12 +58,12 @@ const INDEX_DESCRIPTIONS: Record<ClimateIndex, string[]> = {
   trcmax: [
     "TRCmax is the number of cycles when maximum temperatures rise above 0°C.",
     "TRC indices could reflect the frequency of warm spells.",
-    "Each enabled SSP scenario is plotted as its own line; historical runs through 2014 and projections continue to 2099."
+    "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
   ],
   trcmaxmin: [
     "TRCmaxmin is the number of days when maximum temperatures are above 0°C and minimum temperatures are below 0°C.",
     "TRCmaxmin specifically captures the immediate fluctuation of temperature around the freezing point.",
-    "Each enabled SSP scenario is plotted as its own line; historical runs through 2014 and projections continue to 2099."
+    "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
   ]
 };
 
@@ -61,24 +75,45 @@ const SCENARIO_COLORS: Record<string, string> = {
   ssp585: "#d94c4c"
 };
 
+/** Softer fill colors for min–max bands (same hue family as the line). */
+const SCENARIO_BAND_COLORS: Record<string, string> = {
+  historical: "rgba(52, 120, 199, 0.22)",
+  ssp126: "rgba(59, 139, 98, 0.22)",
+  ssp245: "rgba(212, 176, 32, 0.24)",
+  ssp370: "rgba(118, 84, 173, 0.22)",
+  ssp585: "rgba(217, 76, 76, 0.22)"
+};
+
 function mean(values: number[]): number {
   if (!values.length) return Number.NaN;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+type YearBucket = {
+  mean: number[];
+  min: number[];
+  max: number[];
+};
+
 function seriesForScenario(
   rows: CsvRow[],
   scenario: string,
-  column: "TRCmax" | "TRCmaxmin"
+  column: "TRCmax" | "TRCmaxmin",
+  minColumn: string,
+  maxColumn: string
 ): unknown[] {
-  const byYear = new Map<number, number[]>();
+  const byYear = new Map<number, YearBucket>();
   for (const row of rows) {
     if (normalize(row.Scenario).toLowerCase() !== scenario.toLowerCase()) continue;
     const year = Number(row.Year);
     const value = Number(row[column]);
-    if (!Number.isFinite(year) || !Number.isFinite(value)) continue;
-    const bucket = byYear.get(year) ?? [];
-    bucket.push(value);
+    const minVal = Number(row[minColumn]);
+    const maxVal = Number(row[maxColumn]);
+    if (!Number.isFinite(year)) continue;
+    const bucket = byYear.get(year) ?? { mean: [], min: [], max: [] };
+    if (Number.isFinite(value)) bucket.mean.push(value);
+    if (Number.isFinite(minVal)) bucket.min.push(minVal);
+    if (Number.isFinite(maxVal)) bucket.max.push(maxVal);
     byYear.set(year, bucket);
   }
 
@@ -86,20 +121,59 @@ function seriesForScenario(
   if (!years.length) return [];
 
   const label = scenario === "historical" ? "historical" : scenario.toUpperCase();
-  const y = years.map((year) => mean(byYear.get(year)!));
-  const color = SCENARIO_COLORS[scenario.toLowerCase()] ?? "#697d82";
+  const key = scenario.toLowerCase();
+  const color = SCENARIO_COLORS[key] ?? "#697d82";
+  const bandColor = SCENARIO_BAND_COLORS[key] ?? "rgba(105, 125, 130, 0.2)";
 
-  return [
-    {
-      type: "scatter",
-      mode: "lines",
-      name: label,
-      x: years,
-      y,
-      line: { color, width: 2 },
-      hovertemplate: `${label} ${column}<br>Year %{x}: %{y:.2f} events<extra></extra>`
-    }
-  ];
+  const meanY = years.map((year) => mean(byYear.get(year)!.mean));
+  const minY = years.map((year) => mean(byYear.get(year)!.min));
+  const maxY = years.map((year) => mean(byYear.get(year)!.max));
+  const hasBand = years.some((_, i) => Number.isFinite(minY[i]) && Number.isFinite(maxY[i]));
+
+  const traces: unknown[] = [];
+
+  if (hasBand) {
+    traces.push(
+      {
+        type: "scatter",
+        mode: "lines",
+        name: `${label} max`,
+        x: years,
+        y: maxY,
+        line: { color: "transparent", width: 0 },
+        hoverinfo: "skip",
+        showlegend: false,
+        legendgroup: label
+      },
+      {
+        type: "scatter",
+        mode: "lines",
+        name: `${label} range`,
+        x: years,
+        y: minY,
+        fill: "tonexty",
+        fillcolor: bandColor,
+        line: { color: "transparent", width: 0 },
+        hoverinfo: "skip",
+        showlegend: false,
+        legendgroup: label
+      }
+    );
+  }
+
+  traces.push({
+    type: "scatter",
+    mode: "lines",
+    name: label,
+    x: years,
+    y: meanY,
+    line: { color, width: 2 },
+    hovertemplate: `${label} ${column}<br>Year %{x}: %{y:.2f} events<br>min %{customdata[0]:.2f} · max %{customdata[1]:.2f}<extra></extra>`,
+    customdata: years.map((_, i) => [minY[i], maxY[i]]),
+    legendgroup: label
+  });
+
+  return traces;
 }
 
 export function indexSchemaErrorFor(rows: CsvRow[], selectedEco: string): string {
@@ -107,10 +181,21 @@ export function indexSchemaErrorFor(rows: CsvRow[], selectedEco: string): string
     return "Could not load thaw–refreeze cycle (TRC) data. Check that /data/EcoregionTRC_annual.csv is available.";
   }
   const headers = Object.keys(rows[0]);
-  const required = ["Year", "Model", "Ecoregion", "Scenario", "TRCmax", "TRCmaxmin"];
+  const required = [
+    "Year",
+    "Model",
+    "Ecoregion",
+    "Scenario",
+    "TRCmax",
+    "TRCmax_min",
+    "TRCmax_max",
+    "TRCmaxmin",
+    "TRCmaxmin_min",
+    "TRCmaxmin_max"
+  ];
   const missing = required.filter((col) => !headers.includes(col));
   if (missing.length) {
-    return `TRC CSV schema mismatch. Expected Year, Model, Ecoregion, Scenario, TRCmax, and TRCmaxmin.\nMissing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
+    return `TRC CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
   }
   const hasEco = rows.some((row) => normalize(row.Ecoregion) === normalize(selectedEco));
   if (!hasEco) {
@@ -121,15 +206,18 @@ export function indexSchemaErrorFor(rows: CsvRow[], selectedEco: string): string
 
 export function buildIndexTraces(rows: CsvRow[], snapshot: IndexSnapshot): unknown[] {
   const option = indexOption(snapshot.index);
-  const column = option.column;
   const ecoRows = rows.filter((row) => normalize(row.Ecoregion) === normalize(snapshot.selectedEco));
   const output: unknown[] = [];
 
-  output.push(...seriesForScenario(ecoRows, "historical", column));
+  output.push(
+    ...seriesForScenario(ecoRows, "historical", option.column, option.minColumn, option.maxColumn)
+  );
 
   for (const scenario of SCENARIOS) {
     if (!snapshot.enabledScenarios.includes(scenario)) continue;
-    output.push(...seriesForScenario(ecoRows, scenario, column));
+    output.push(
+      ...seriesForScenario(ecoRows, scenario, option.column, option.minColumn, option.maxColumn)
+    );
   }
 
   return output;
@@ -142,6 +230,6 @@ export function indexHelpLines(index: ClimateIndex): string[] {
 export function climateIndexIntroLines(): string[] {
   return [
     "Climate indices are derived metrics — numbers you calculate from daily climate data using rules, not raw fields you download directly.",
-    "Pick TRCmax or TRCmaxmin — each generates its own chart with one line per enabled scenario."
+    "Pick TRCmax or TRCmaxmin — each generates its own chart with one line per enabled scenario and a lighter min–max band."
   ];
 }

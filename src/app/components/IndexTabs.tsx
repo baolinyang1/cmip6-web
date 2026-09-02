@@ -15,7 +15,7 @@ export default function IndexTabs({ value, onChange }: IndexTabsProps) {
       value={value}
       onChange={onChange}
       ariaLabel="Climate indices"
-      tabWidth="7.5rem"
+      tabWidth="8.25rem"
     />
   );
 }

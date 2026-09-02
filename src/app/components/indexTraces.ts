@@ -1,23 +1,100 @@
 import { normalize, SCENARIOS, type CsvRow } from "./chartTraces";
 
+export type IndexOption = {
+  id: string;
+  label: string;
+  fullName: string;
+  column: string;
+  minColumn: string;
+  maxColumn: string;
+  csv: string;
+  yAxisTitle: string;
+  unitLabel: string;
+  help: string[];
+};
+
 export const INDEX_OPTIONS = [
   {
     id: "trcmax",
     label: "TRCmax",
+    fullName: "TRCmax (Thaw–Refreeze Cycles)",
     column: "TRCmax",
     minColumn: "TRCmax_min",
     maxColumn: "TRCmax_max",
-    csv: "/data/EcoregionTRC_annual.csv"
+    csv: "/data/EcoregionTRC_annual.csv",
+    yAxisTitle: "Number of events",
+    unitLabel: "events",
+    help: [
+      "TRCmax is the number of cycles when maximum temperatures rise above 0°C.",
+      "TRC indices could reflect the frequency of warm spells.",
+      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+    ]
   },
   {
     id: "trcmaxmin",
     label: "TRCmaxmin",
+    fullName: "TRCmaxmin (Thaw–Refreeze Cycles)",
     column: "TRCmaxmin",
     minColumn: "TRCmaxmin_min",
     maxColumn: "TRCmaxmin_max",
-    csv: "/data/EcoregionTRC_annual.csv"
+    csv: "/data/EcoregionTRC_annual.csv",
+    yAxisTitle: "Number of events",
+    unitLabel: "events",
+    help: [
+      "TRCmaxmin is the number of days when maximum temperatures are above 0°C and minimum temperatures are below 0°C.",
+      "TRCmaxmin specifically captures the immediate fluctuation of temperature around the freezing point.",
+      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+    ]
+  },
+  {
+    id: "cddmmean",
+    label: "CDDMmean",
+    fullName: "CDDMmean — Cumulative Degree Days of Melting",
+    column: "CDDMmean",
+    minColumn: "CDDMmean_min",
+    maxColumn: "CDDMmean_max",
+    csv: "/data/EcoregionCDDM_annual.csv",
+    yAxisTitle: "Cumulative degree days (°C·days)",
+    unitLabel: "°C·days",
+    help: [
+      "CDDMmean is Cumulative Degree Days of Melting derived from mean temperature.",
+      "Threshold: −3°C (mean temperature).",
+      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+    ]
+  },
+  {
+    id: "cddmmax",
+    label: "CDDMmax",
+    fullName: "CDDMmax — Cumulative Degree Days of Melting",
+    column: "CDDMmax",
+    minColumn: "CDDMmax_min",
+    maxColumn: "CDDMmax_max",
+    csv: "/data/EcoregionCDDM_annual.csv",
+    yAxisTitle: "Cumulative degree days (°C·days)",
+    unitLabel: "°C·days",
+    help: [
+      "CDDMmax is Cumulative Degree Days of Melting derived from maximum temperature.",
+      "Threshold: 0°C (maximum temperature).",
+      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+    ]
+  },
+  {
+    id: "warmspell3",
+    label: "WarmSpell3",
+    fullName: "WarmSpell3 — Three Consecutive Days Warm Window",
+    column: "WarmSpell3",
+    minColumn: "WarmSpell3_min",
+    maxColumn: "WarmSpell3_max",
+    csv: "/data/EcoregionWarmSpell3_annual.csv",
+    yAxisTitle: "Number of events",
+    unitLabel: "events",
+    help: [
+      "WarmSpell3 (3-day Warm Spell) counts three consecutive days in a warm window.",
+      "Derived from mean temperature with a 0°C threshold.",
+      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+    ]
   }
-] as const;
+] as const satisfies readonly IndexOption[];
 
 export type ClimateIndex = (typeof INDEX_OPTIONS)[number]["id"];
 
@@ -27,14 +104,8 @@ export type IndexSnapshot = {
   enabledScenarios: string[];
 };
 
-export const INDEX_Y_AXIS_TITLE = "Number of events";
-
-export function indexOption(index: ClimateIndex) {
+export function indexOption(index: ClimateIndex): IndexOption {
   return INDEX_OPTIONS.find((option) => option.id === index)!;
-}
-
-export function indexColumn(index: ClimateIndex): "TRCmax" | "TRCmaxmin" {
-  return indexOption(index).column;
 }
 
 export function csvPathForIndex(index: ClimateIndex): string {
@@ -42,30 +113,16 @@ export function csvPathForIndex(index: ClimateIndex): string {
 }
 
 export function indexChartTitle(index: ClimateIndex): string {
-  switch (index) {
-    case "trcmax":
-      return "TRCmax (Thaw–Refreeze Cycles)";
-    case "trcmaxmin":
-      return "TRCmaxmin (Thaw–Refreeze Cycles)";
-  }
+  return indexOption(index).fullName;
+}
+
+export function indexYAxisTitle(index: ClimateIndex): string {
+  return indexOption(index).yAxisTitle;
 }
 
 export function indexTitle(index: ClimateIndex): string {
   return indexOption(index).label;
 }
-
-const INDEX_DESCRIPTIONS: Record<ClimateIndex, string[]> = {
-  trcmax: [
-    "TRCmax is the number of cycles when maximum temperatures rise above 0°C.",
-    "TRC indices could reflect the frequency of warm spells.",
-    "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
-  ],
-  trcmaxmin: [
-    "TRCmaxmin is the number of days when maximum temperatures are above 0°C and minimum temperatures are below 0°C.",
-    "TRCmaxmin specifically captures the immediate fluctuation of temperature around the freezing point.",
-    "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
-  ]
-};
 
 const SCENARIO_COLORS: Record<string, string> = {
   historical: "#3478c7",
@@ -98,17 +155,15 @@ type YearBucket = {
 function seriesForScenario(
   rows: CsvRow[],
   scenario: string,
-  column: "TRCmax" | "TRCmaxmin",
-  minColumn: string,
-  maxColumn: string
+  option: IndexOption
 ): unknown[] {
   const byYear = new Map<number, YearBucket>();
   for (const row of rows) {
     if (normalize(row.Scenario).toLowerCase() !== scenario.toLowerCase()) continue;
     const year = Number(row.Year);
-    const value = Number(row[column]);
-    const minVal = Number(row[minColumn]);
-    const maxVal = Number(row[maxColumn]);
+    const value = Number(row[option.column]);
+    const minVal = Number(row[option.minColumn]);
+    const maxVal = Number(row[option.maxColumn]);
     if (!Number.isFinite(year)) continue;
     const bucket = byYear.get(year) ?? { mean: [], min: [], max: [] };
     if (Number.isFinite(value)) bucket.mean.push(value);
@@ -168,7 +223,7 @@ function seriesForScenario(
     x: years,
     y: meanY,
     line: { color, width: 2 },
-    hovertemplate: `${label} ${column}<br>Year %{x}: %{y:.2f} events<br>min %{customdata[0]:.2f} · max %{customdata[1]:.2f}<extra></extra>`,
+    hovertemplate: `${label} ${option.column}<br>Year %{x}: %{y:.2f} ${option.unitLabel}<br>min %{customdata[0]:.2f} · max %{customdata[1]:.2f}<extra></extra>`,
     customdata: years.map((_, i) => [minY[i], maxY[i]]),
     legendgroup: label
   });
@@ -176,9 +231,14 @@ function seriesForScenario(
   return traces;
 }
 
-export function indexSchemaErrorFor(rows: CsvRow[], selectedEco: string): string {
+export function indexSchemaErrorFor(
+  rows: CsvRow[],
+  index: ClimateIndex,
+  selectedEco: string
+): string {
+  const option = indexOption(index);
   if (!rows.length) {
-    return "Could not load thaw–refreeze cycle (TRC) data. Check that /data/EcoregionTRC_annual.csv is available.";
+    return `Could not load ${option.label} data. Check that ${option.csv} is available.`;
   }
   const headers = Object.keys(rows[0]);
   const required = [
@@ -186,20 +246,17 @@ export function indexSchemaErrorFor(rows: CsvRow[], selectedEco: string): string
     "Model",
     "Ecoregion",
     "Scenario",
-    "TRCmax",
-    "TRCmax_min",
-    "TRCmax_max",
-    "TRCmaxmin",
-    "TRCmaxmin_min",
-    "TRCmaxmin_max"
+    option.column,
+    option.minColumn,
+    option.maxColumn
   ];
   const missing = required.filter((col) => !headers.includes(col));
   if (missing.length) {
-    return `TRC CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
+    return `${option.label} CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
   }
   const hasEco = rows.some((row) => normalize(row.Ecoregion) === normalize(selectedEco));
   if (!hasEco) {
-    return `No TRC data for ecoregion ${selectedEco}.`;
+    return `No ${option.label} data for ecoregion ${selectedEco}.`;
   }
   return "";
 }
@@ -209,27 +266,23 @@ export function buildIndexTraces(rows: CsvRow[], snapshot: IndexSnapshot): unkno
   const ecoRows = rows.filter((row) => normalize(row.Ecoregion) === normalize(snapshot.selectedEco));
   const output: unknown[] = [];
 
-  output.push(
-    ...seriesForScenario(ecoRows, "historical", option.column, option.minColumn, option.maxColumn)
-  );
+  output.push(...seriesForScenario(ecoRows, "historical", option));
 
   for (const scenario of SCENARIOS) {
     if (!snapshot.enabledScenarios.includes(scenario)) continue;
-    output.push(
-      ...seriesForScenario(ecoRows, scenario, option.column, option.minColumn, option.maxColumn)
-    );
+    output.push(...seriesForScenario(ecoRows, scenario, option));
   }
 
   return output;
 }
 
 export function indexHelpLines(index: ClimateIndex): string[] {
-  return INDEX_DESCRIPTIONS[index];
+  return [...indexOption(index).help];
 }
 
 export function climateIndexIntroLines(): string[] {
   return [
     "Climate indices are derived metrics — numbers you calculate from daily climate data using rules, not raw fields you download directly.",
-    "Pick TRCmax or TRCmaxmin — each generates its own chart with one line per enabled scenario and a lighter min–max band."
+    "Pick one index — each generates its own chart with one line per enabled scenario and a lighter min–max band."
   ];
 }

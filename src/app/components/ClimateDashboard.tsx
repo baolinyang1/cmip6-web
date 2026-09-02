@@ -29,8 +29,8 @@ import {
   indexChartTitle,
   indexHelpLines,
   indexSchemaErrorFor,
+  indexYAxisTitle,
   INDEX_OPTIONS,
-  INDEX_Y_AXIS_TITLE,
   type ClimateIndex
 } from "./indexTraces";
 import IndexTabs from "./IndexTabs";
@@ -310,7 +310,7 @@ export default function ClimateDashboard() {
         }
 
         const rows = nextIndexData[climateIndex] ?? [];
-        const schemaError = indexSchemaErrorFor(rows, selectedEco);
+        const schemaError = indexSchemaErrorFor(rows, climateIndex, selectedEco);
         if (schemaError) {
           setError(schemaError);
           return;
@@ -352,7 +352,7 @@ export default function ClimateDashboard() {
               : selectedEco,
             metric: { source: "index", id: climateIndex },
             chartKind: "timeseries",
-            yAxisLabel: INDEX_Y_AXIS_TITLE,
+            yAxisLabel: indexYAxisTitle(climateIndex),
             traces,
             x,
             y,

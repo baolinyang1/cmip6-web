@@ -55,10 +55,10 @@ const INDEX_DESCRIPTIONS: Record<ClimateIndex, string[]> = {
 
 const SCENARIO_COLORS: Record<string, string> = {
   historical: "#3478c7",
-  ssp126: "#d94c4c",
-  ssp245: "#3b8b62",
-  ssp370: "#b8894a",
-  ssp585: "#7654ad"
+  ssp126: "#3b8b62",
+  ssp245: "#d4b020",
+  ssp370: "#7654ad",
+  ssp585: "#d94c4c"
 };
 
 function mean(values: number[]): number {

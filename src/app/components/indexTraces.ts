@@ -1,5 +1,7 @@
 import { normalize, SCENARIOS, type CsvRow } from "./chartTraces";
 
+export type Geography = "ecoregion" | "metro";
+
 export type IndexOption = {
   id: string;
   label: string;
@@ -9,7 +11,7 @@ export type IndexOption = {
   maxColumn: string;
   minModelColumn: string;
   maxModelColumn: string;
-  csv: string;
+  csv: Record<Geography, string>;
   yAxisTitle: string;
   unitLabel: string;
   help: string[];
@@ -25,7 +27,10 @@ export const INDEX_OPTIONS = [
     maxColumn: "TRCmax_max",
     minModelColumn: "TRCmax_min_model",
     maxModelColumn: "TRCmax_max_model",
-    csv: "/data/EcoregionTRC_annual.csv",
+    csv: {
+      ecoregion: "/data/EcoregionTRC_annual.csv",
+      metro: "/data/MetroTRC_annual.csv"
+    },
     yAxisTitle: "Number of events",
     unitLabel: "events",
     help: [
@@ -41,7 +46,10 @@ export const INDEX_OPTIONS = [
     maxColumn: "TRCmaxmin_max",
     minModelColumn: "TRCmaxmin_min_model",
     maxModelColumn: "TRCmaxmin_max_model",
-    csv: "/data/EcoregionTRC_annual.csv",
+    csv: {
+      ecoregion: "/data/EcoregionTRC_annual.csv",
+      metro: "/data/MetroTRC_annual.csv"
+    },
     yAxisTitle: "Number of events",
     unitLabel: "events",
     help: [
@@ -57,7 +65,10 @@ export const INDEX_OPTIONS = [
     maxColumn: "CDDMmean_max",
     minModelColumn: "CDDMmean_min_model",
     maxModelColumn: "CDDMmean_max_model",
-    csv: "/data/EcoregionCDDM_annual.csv",
+    csv: {
+      ecoregion: "/data/EcoregionCDDM_annual.csv",
+      metro: "/data/MetroCDDM_annual.csv"
+    },
     yAxisTitle: "Cumulative degree days (°C·days)",
     unitLabel: "°C·days",
     help: [
@@ -73,7 +84,10 @@ export const INDEX_OPTIONS = [
     maxColumn: "CDDMmax_max",
     minModelColumn: "CDDMmax_min_model",
     maxModelColumn: "CDDMmax_max_model",
-    csv: "/data/EcoregionCDDM_annual.csv",
+    csv: {
+      ecoregion: "/data/EcoregionCDDM_annual.csv",
+      metro: "/data/MetroCDDM_annual.csv"
+    },
     yAxisTitle: "Cumulative degree days (°C·days)",
     unitLabel: "°C·days",
     help: [
@@ -89,7 +103,10 @@ export const INDEX_OPTIONS = [
     maxColumn: "WarmSpell3_max",
     minModelColumn: "WarmSpell3_min_model",
     maxModelColumn: "WarmSpell3_max_model",
-    csv: "/data/EcoregionWarmSpell3_annual.csv",
+    csv: {
+      ecoregion: "/data/EcoregionWarmSpell3_annual.csv",
+      metro: "/data/MetroWarmSpell3_annual.csv"
+    },
     yAxisTitle: "Number of events",
     unitLabel: "events",
     help: [
@@ -102,7 +119,8 @@ export type ClimateIndex = (typeof INDEX_OPTIONS)[number]["id"];
 
 export type IndexSnapshot = {
   index: ClimateIndex;
-  selectedEco: string;
+  geography: Geography;
+  selectedRegion: string;
   enabledScenarios: string[];
 };
 
@@ -110,8 +128,12 @@ export function indexOption(index: ClimateIndex): IndexOption {
   return INDEX_OPTIONS.find((option) => option.id === index)!;
 }
 
-export function csvPathForIndex(index: ClimateIndex): string {
-  return indexOption(index).csv;
+export function regionColumnFor(geography: Geography): "Ecoregion" | "City" {
+  return geography === "metro" ? "City" : "Ecoregion";
+}
+
+export function csvPathForIndex(index: ClimateIndex, geography: Geography = "ecoregion"): string {
+  return indexOption(index).csv[geography];
 }
 
 export function indexChartTitle(index: ClimateIndex): string {
@@ -242,16 +264,18 @@ function seriesForScenario(
 export function indexSchemaErrorFor(
   rows: CsvRow[],
   index: ClimateIndex,
-  selectedEco: string
+  selectedRegion: string,
+  geography: Geography = "ecoregion"
 ): string {
   const option = indexOption(index);
+  const regionColumn = regionColumnFor(geography);
   if (!rows.length) {
-    return `Could not load ${option.label} data. Check that ${option.csv} is available.`;
+    return `Could not load ${option.label} data. Check that ${option.csv[geography]} is available.`;
   }
   const headers = Object.keys(rows[0]);
   const required = [
     "Year",
-    "Ecoregion",
+    regionColumn,
     "Scenario",
     option.column,
     option.minColumn,
@@ -261,23 +285,26 @@ export function indexSchemaErrorFor(
   if (missing.length) {
     return `${option.label} CSV schema mismatch. Missing: ${missing.join(", ")}.\nDetected headers: ${headers.join(", ")}`;
   }
-  const hasEco = rows.some((row) => normalize(row.Ecoregion) === normalize(selectedEco));
-  if (!hasEco) {
-    return `No ${option.label} data for ecoregion ${selectedEco}.`;
+  const hasRegion = rows.some((row) => normalize(row[regionColumn]) === normalize(selectedRegion));
+  if (!hasRegion) {
+    return `No ${option.label} data for ${geography === "metro" ? "city" : "ecoregion"} ${selectedRegion}.`;
   }
   return "";
 }
 
 export function buildIndexTraces(rows: CsvRow[], snapshot: IndexSnapshot): unknown[] {
   const option = indexOption(snapshot.index);
-  const ecoRows = rows.filter((row) => normalize(row.Ecoregion) === normalize(snapshot.selectedEco));
+  const regionColumn = regionColumnFor(snapshot.geography);
+  const regionRows = rows.filter(
+    (row) => normalize(row[regionColumn]) === normalize(snapshot.selectedRegion)
+  );
   const output: unknown[] = [];
 
-  output.push(...seriesForScenario(ecoRows, "historical", option));
+  output.push(...seriesForScenario(regionRows, "historical", option));
 
   for (const scenario of SCENARIOS) {
     if (!snapshot.enabledScenarios.includes(scenario)) continue;
-    output.push(...seriesForScenario(ecoRows, scenario, option));
+    output.push(...seriesForScenario(regionRows, scenario, option));
   }
 
   return output;

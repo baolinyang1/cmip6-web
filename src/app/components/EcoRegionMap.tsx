@@ -3,7 +3,7 @@
 import type { Feature, FeatureCollection, Geometry } from "geojson";
 import L from "leaflet";
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
-import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
+import { CircleMarker, GeoJSON, MapContainer, TileLayer, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./eco-map.css";
 
@@ -17,18 +17,29 @@ export const FULL_MAP_VIEW: MapViewState = {
   zoom: 3
 };
 
+export type MapOverlayMode = "ecoregion" | "metro";
+
 export type RegionLabel = {
   level1: string;
   level2: string;
   level3: string;
 };
 
-type EcoFeatureProps = {
-  code: string;
+type MapFeatureProps = {
+  id: string;
   name: string;
+  detail?: string;
 };
 
-type EcoFeature = Feature<Geometry, EcoFeatureProps>;
+type MapFeature = Feature<Geometry, MapFeatureProps>;
+
+type MetroPoint = {
+  id: string;
+  name: string;
+  detail?: string;
+  lat: number;
+  lon: number;
+};
 
 const LEVEL1_COLORS: Record<string, string> = {
   "1": "#7eb6d9",
@@ -48,19 +59,29 @@ const LEVEL1_COLORS: Record<string, string> = {
   "15": "#5f9e8f"
 };
 
-function colorForCode(code: string): string {
+function colorForEcoregion(code: string): string {
   const level1 = code.split(".")[0] ?? "";
   return LEVEL1_COLORS[level1] ?? "#8aa0a8";
 }
 
-function pathStyle(code: string, selectedCode: string): L.PathOptions {
+function ecoPathStyle(code: string, selectedCode: string): L.PathOptions {
   const selected = code === selectedCode;
   return {
-    fillColor: colorForCode(code),
+    fillColor: colorForEcoregion(code),
     color: selected ? "#0d6670" : "rgba(35, 55, 62, 0.55)",
     weight: selected ? 2.4 : 0.55,
     opacity: 1,
     fillOpacity: selected ? 0.82 : 0.38
+  };
+}
+
+function metroPathStyle(selected: boolean): L.PathOptions {
+  return {
+    fillColor: selected ? "#0d6670" : "#5aa8b2",
+    color: selected ? "#0a4f57" : "rgba(13, 102, 112, 0.65)",
+    weight: selected ? 2.4 : 1,
+    opacity: 1,
+    fillOpacity: selected ? 0.45 : 0.18
   };
 }
 
@@ -74,21 +95,20 @@ function copyView(view: MapViewState): MapViewState {
 function FocusSelected({
   data,
   selectedCode,
-  enabled
+  enabled,
+  maxZoom
 }: {
-  data: FeatureCollection<Geometry, EcoFeatureProps> | null;
+  data: FeatureCollection<Geometry, MapFeatureProps> | null;
   selectedCode: string;
   enabled: boolean;
+  maxZoom: number;
 }) {
   const map = useMap();
-  // Seed with the current selection so remounts / overlay toggles do not auto-zoom.
   const previousCodeRef = useRef<string | null>(selectedCode);
 
   useEffect(() => {
     if (!data || !selectedCode) return;
 
-    // Keep the current view when ecoregions are toggled on/off.
-    // Only zoom when the selected region changes while the overlay is visible.
     if (!enabled) {
       previousCodeRef.current = selectedCode;
       return;
@@ -97,18 +117,18 @@ function FocusSelected({
     if (previousCodeRef.current === selectedCode) return;
     previousCodeRef.current = selectedCode;
 
-    const matches = data.features.filter((feature) => feature.properties?.code === selectedCode);
+    const matches = data.features.filter((feature) => feature.properties?.id === selectedCode);
     if (!matches.length) return;
-    const collection: FeatureCollection<Geometry, EcoFeatureProps> = {
+    const collection: FeatureCollection<Geometry, MapFeatureProps> = {
       type: "FeatureCollection",
       features: matches
     };
     const layer = L.geoJSON(collection as never);
     const bounds = layer.getBounds();
     if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [18, 18], maxZoom: 6, animate: true });
+      map.fitBounds(bounds, { padding: [18, 18], maxZoom, animate: true });
     }
-  }, [data, selectedCode, enabled, map]);
+  }, [data, selectedCode, enabled, map, maxZoom]);
 
   return null;
 }
@@ -195,11 +215,73 @@ function ViewPersistence({
   return null;
 }
 
+function normalizeEcoregionData(
+  json: FeatureCollection<Geometry, { code?: string; name?: string }>
+): FeatureCollection<Geometry, MapFeatureProps> {
+  return {
+    type: "FeatureCollection",
+    features: json.features.map((feature) => ({
+      ...feature,
+      properties: {
+        id: String(feature.properties?.code ?? ""),
+        name: String(feature.properties?.name ?? feature.properties?.code ?? "")
+      }
+    }))
+  };
+}
+
+function normalizeMetroBuffers(
+  json: FeatureCollection<
+    Geometry,
+    { city?: string; metro_name?: string; country?: string }
+  >
+): FeatureCollection<Geometry, MapFeatureProps> {
+  return {
+    type: "FeatureCollection",
+    features: json.features
+      .map((feature) => {
+        const city = String(feature.properties?.city ?? "").trim();
+        return {
+          ...feature,
+          properties: {
+            id: city,
+            name: city,
+            detail: String(feature.properties?.country ?? "").trim() || undefined
+          }
+        };
+      })
+      .filter((feature) => feature.properties.id)
+  };
+}
+
+function normalizeMetroPoints(
+  json: FeatureCollection<
+    Geometry,
+    { city?: string; country?: string; lat?: number; lon?: number }
+  >
+): MetroPoint[] {
+  return json.features
+    .map((feature) => {
+      const city = String(feature.properties?.city ?? "").trim();
+      const lat = Number(feature.properties?.lat);
+      const lon = Number(feature.properties?.lon);
+      return {
+        id: city,
+        name: city,
+        detail: String(feature.properties?.country ?? "").trim() || undefined,
+        lat,
+        lon
+      };
+    })
+    .filter((point) => point.id && Number.isFinite(point.lat) && Number.isFinite(point.lon));
+}
+
 export default function EcoRegionMap({
   selectedCode,
   onSelect,
-  showEcoregions,
-  onShowEcoregionsChange,
+  overlayMode = "ecoregion",
+  showOverlay,
+  onShowOverlayChange,
   view,
   onViewChange,
   onExitToInitialView,
@@ -208,8 +290,9 @@ export default function EcoRegionMap({
 }: {
   selectedCode: string;
   onSelect: (code: string) => void;
-  showEcoregions: boolean;
-  onShowEcoregionsChange: (show: boolean) => void;
+  overlayMode?: MapOverlayMode;
+  showOverlay: boolean;
+  onShowOverlayChange: (show: boolean) => void;
   view: MapViewState;
   onViewChange: (view: MapViewState) => void;
   /** Leave the chart workspace and restore the initial full-screen map layout. */
@@ -217,13 +300,15 @@ export default function EcoRegionMap({
   regionLabels?: Record<string, RegionLabel>;
   compact?: boolean;
 }) {
-  const [data, setData] = useState<FeatureCollection<Geometry, EcoFeatureProps> | null>(null);
+  const [data, setData] = useState<FeatureCollection<Geometry, MapFeatureProps> | null>(null);
+  const [metroPoints, setMetroPoints] = useState<MetroPoint[]>([]);
   const [loadError, setLoadError] = useState("");
   const geoJsonRef = useRef<L.GeoJSON | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const suppressSaveRef = useRef(false);
   const selectedRef = useRef(selectedCode);
   const labelsRef = useRef(regionLabels);
+  const isMetro = overlayMode === "metro";
 
   useEffect(() => {
     selectedRef.current = selectedCode;
@@ -241,12 +326,20 @@ export default function EcoRegionMap({
       .replaceAll('"', "&quot;");
   }
 
-  function tooltipFor(code: string, fallbackName: string): string {
-    const label = labelsRef.current[code];
+  function tooltipFor(id: string, fallbackName: string, detail?: string): string {
+    if (isMetro) {
+      const parts = [fallbackName || id, detail].filter(Boolean) as string[];
+      return `<span class="eco-map-tooltip-body">${parts.map(escapeHtml).join("<br/>")}</span>`;
+    }
+    const label = labelsRef.current[id];
     const parts = label
-      ? [code, label.level1, label.level2, label.level3]
-      : [code, fallbackName];
+      ? [id, label.level1, label.level2, label.level3]
+      : [id, fallbackName];
     return `<span class="eco-map-tooltip-body">${parts.map(escapeHtml).join("<br/>")}</span>`;
+  }
+
+  function styleFor(id: string, selectedId: string): L.PathOptions {
+    return isMetro ? metroPathStyle(id === selectedId) : ecoPathStyle(id, selectedId);
   }
 
   function resetToFullMap() {
@@ -262,18 +355,45 @@ export default function EcoRegionMap({
       });
     }
     onViewChange(next);
-    // Restore the app's initial full-screen map layout (exit chart workspace).
     onExitToInitialView?.();
   }
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
+      setLoadError("");
+      setData(null);
+      setMetroPoints([]);
       try {
+        if (overlayMode === "metro") {
+          const [buffersResponse, pointsResponse] = await Promise.all([
+            fetch("/data/major_cities_buffers_75km.geojson"),
+            fetch("/data/major_cities_points.geojson")
+          ]);
+          if (!buffersResponse.ok) throw new Error(`HTTP ${buffersResponse.status}`);
+          if (!pointsResponse.ok) throw new Error(`HTTP ${pointsResponse.status}`);
+          const buffersJson = (await buffersResponse.json()) as FeatureCollection<
+            Geometry,
+            { city?: string; metro_name?: string; country?: string }
+          >;
+          const pointsJson = (await pointsResponse.json()) as FeatureCollection<
+            Geometry,
+            { city?: string; country?: string; lat?: number; lon?: number }
+          >;
+          if (!cancelled) {
+            setData(normalizeMetroBuffers(buffersJson));
+            setMetroPoints(normalizeMetroPoints(pointsJson));
+          }
+          return;
+        }
+
         const response = await fetch("/data/na_level3_ecoregions.geojson");
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const json = (await response.json()) as FeatureCollection<Geometry, EcoFeatureProps>;
-        if (!cancelled) setData(json);
+        const json = (await response.json()) as FeatureCollection<
+          Geometry,
+          { code?: string; name?: string }
+        >;
+        if (!cancelled) setData(normalizeEcoregionData(json));
       } catch (error) {
         if (!cancelled) {
           setLoadError(error instanceof Error ? error.message : String(error));
@@ -284,20 +404,21 @@ export default function EcoRegionMap({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [overlayMode]);
 
   useEffect(() => {
-    if (!showEcoregions) return;
+    if (!showOverlay) return;
     const layer = geoJsonRef.current;
     if (!layer) return;
     layer.eachLayer((path) => {
-      const feature = (path as L.Layer & { feature?: EcoFeature }).feature;
-      const code = feature?.properties?.code;
-      if (!code) return;
-      (path as L.Path).setStyle(pathStyle(code, selectedCode));
-      if (code === selectedCode) (path as L.Path).bringToFront();
+      const feature = (path as L.Layer & { feature?: MapFeature }).feature;
+      const id = feature?.properties?.id;
+      if (!id) return;
+      const nextStyle = isMetro ? metroPathStyle(id === selectedCode) : ecoPathStyle(id, selectedCode);
+      (path as L.Path).setStyle(nextStyle);
+      if (id === selectedCode) (path as L.Path).bringToFront();
     });
-  }, [selectedCode, data, showEcoregions]);
+  }, [selectedCode, data, showOverlay, isMetro]);
 
   if (loadError) {
     return <div className="map-fallback">Could not load map: {loadError}</div>;
@@ -321,47 +442,84 @@ export default function EcoRegionMap({
           onViewChange={onViewChange}
           suppressSaveRef={suppressSaveRef}
         />
-        {/* OpenStreetMap basemap — no API key required. */}
         <TileLayer
           url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           maxZoom={19}
         />
-        {showEcoregions && data ? (
+        {showOverlay && data ? (
           <GeoJSON
-            key={`ecoregions-on-${Object.keys(regionLabels).length}`}
+            key={`${overlayMode}-on-${Object.keys(regionLabels).length}`}
             ref={geoJsonRef}
             data={data}
-            style={(feature) => pathStyle(feature?.properties?.code ?? "", selectedRef.current)}
+            style={(feature) => styleFor(feature?.properties?.id ?? "", selectedRef.current)}
             onEachFeature={(feature, layer) => {
-              const props = (feature as EcoFeature).properties;
-              layer.bindTooltip(tooltipFor(props.code, props.name), {
+              const props = (feature as MapFeature).properties;
+              layer.bindTooltip(tooltipFor(props.id, props.name, props.detail), {
                 sticky: true,
                 opacity: 0.95,
                 className: "eco-map-tooltip",
                 direction: "top"
               });
               layer.on({
-                click: () => onSelect(props.code),
+                click: () => onSelect(props.id),
                 mouseover: (event) => {
                   const target = event.target as L.Path;
                   target.setStyle({
                     weight: 2,
-                    fillOpacity: 0.7,
+                    fillOpacity: isMetro ? 0.35 : 0.7,
                     color: "#0d6670"
                   });
                   target.bringToFront();
                 },
                 mouseout: (event) => {
                   const target = event.target as L.Path;
-                  target.setStyle(pathStyle(props.code, selectedRef.current));
-                  if (props.code === selectedRef.current) target.bringToFront();
+                  target.setStyle(styleFor(props.id, selectedRef.current));
+                  if (props.id === selectedRef.current) target.bringToFront();
                 }
               });
             }}
           />
         ) : null}
-        <FocusSelected data={data} selectedCode={selectedCode} enabled={showEcoregions} />
+        {showOverlay && isMetro
+          ? metroPoints.map((point) => {
+              const selected = point.id === selectedCode;
+              return (
+                <CircleMarker
+                  key={point.id}
+                  center={[point.lat, point.lon]}
+                  radius={selected ? 7 : 5}
+                  pathOptions={{
+                    color: selected ? "#0a4f57" : "#0d6670",
+                    weight: 1.5,
+                    fillColor: selected ? "#0d6670" : "#ffffff",
+                    fillOpacity: 1
+                  }}
+                  eventHandlers={{
+                    click: () => onSelect(point.id)
+                  }}
+                >
+                  <Tooltip direction="top" opacity={0.95} className="eco-map-tooltip">
+                    <span className="eco-map-tooltip-body">
+                      {point.name}
+                      {point.detail ? (
+                        <>
+                          <br />
+                          {point.detail}
+                        </>
+                      ) : null}
+                    </span>
+                  </Tooltip>
+                </CircleMarker>
+              );
+            })
+          : null}
+        <FocusSelected
+          data={data}
+          selectedCode={selectedCode}
+          enabled={showOverlay}
+          maxZoom={isMetro ? 8 : 6}
+        />
       </MapContainer>
 
       <div className="map-toolbar">
@@ -378,11 +536,17 @@ export default function EcoRegionMap({
         ) : null}
         <button
           type="button"
-          className={`map-tool-btn map-toggle${showEcoregions ? " active" : ""}`}
-          onClick={() => onShowEcoregionsChange(!showEcoregions)}
-          aria-pressed={showEcoregions}
+          className={`map-tool-btn map-toggle${showOverlay ? " active" : ""}`}
+          onClick={() => onShowOverlayChange(!showOverlay)}
+          aria-pressed={showOverlay}
         >
-          {showEcoregions ? "Ecoregions on" : "Ecoregions off"}
+          {isMetro
+            ? showOverlay
+              ? "Cities on"
+              : "Cities off"
+            : showOverlay
+              ? "Ecoregions on"
+              : "Ecoregions off"}
         </button>
       </div>
     </div>

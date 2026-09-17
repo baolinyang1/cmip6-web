@@ -252,6 +252,10 @@ h1 {
 }
 .help-dropdown {
   position: relative;
+  z-index: 1;
+}
+.help-dropdown:has(.help-dropdown-menu) {
+  z-index: 2000;
 }
 .help-dropdown-trigger {
   display: flex;
@@ -284,7 +288,7 @@ h1 {
 }
 .help-dropdown-menu {
   position: absolute;
-  z-index: 40;
+  z-index: 2000;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
@@ -356,6 +360,10 @@ h1 {
   color: var(--muted);
   font-weight: 700;
   font-size: 11px;
+}
+.segmented button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 .segmented button.active {
   background: white;

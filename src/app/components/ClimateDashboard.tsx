@@ -31,7 +31,8 @@ import {
   indexSchemaErrorFor,
   indexYAxisTitle,
   INDEX_OPTIONS,
-  type ClimateIndex
+  type ClimateIndex,
+  type Geography
 } from "./indexTraces";
 import HelpDropdown from "./HelpDropdown";
 
@@ -57,7 +58,7 @@ const COLLAPSED_ROW_GAP = 8;
 /** Top inset inside the stage (toolbar is already in-flow above the stage). */
 const STAGE_TOP = GRID_GAP;
 
-type HelpTopic = "season" | "ecoregion" | "scenarios";
+type HelpTopic = "season" | "region" | "scenarios";
 type ChartSource = "variable" | "index";
 
 const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
@@ -69,12 +70,13 @@ const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
       "Seasonal views help you see whether change is stronger in a particular time of year (for example, hotter summers or wetter winters)."
     ]
   },
-  ecoregion: {
-    title: "Ecoregion",
+  region: {
+    title: "Geography",
     body: [
-      "An ecoregion is a geographic area with similar ecosystems, climate, and landscapes. This tool uses EPA Level III ecoregions across North America.",
-      "Pick a region from the list, or turn on ecoregion layers on the map and click a region. The chart then shows climate projections for that area only.",
-      "Each option is labeled with a code and Level III name. Hover an option to see the broader Level I and Level II context."
+      "For climate indices, choose Level III ecoregions or major metro areas.",
+      "Ecoregions are geographic areas with similar ecosystems, climate, and landscapes (EPA Level III across North America).",
+      "Major metros use city-level climate index summaries. Turn on Cities on the map and click a metro buffer or point to select it.",
+      "For ecoregions, you can also turn on map layers and click a region to select it."
     ]
   },
   scenarios: {
@@ -90,11 +92,11 @@ const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
 const USER_GUIDE_STEPS = [
   {
     title: "Set your options",
-    body: "In Controls, choose climate variables or climate indices, then pick the specific metric. For variables, also choose a season. Select SSP scenarios, and tap ? for definitions."
+    body: "Choose ecoregion or major metro, then pick climate variables or climate indices. For variables, also choose a season. Select SSP scenarios, and tap ? for definitions."
   },
   {
-    title: "Choose an ecoregion",
-    body: "Pick a Level III ecoregion from the dropdown, or turn on Ecoregions on the map and click a region. The chart will use that area only."
+    title: "Choose a place",
+    body: "Pick a Level III ecoregion or major metro from the dropdown. For ecoregions, you can also turn on Ecoregions on the map and click a region."
   },
   {
     title: "Generate a chart",
@@ -242,19 +244,23 @@ async function loadCsv(urls: string[]): Promise<{ rows: CsvRow[]; url: string }>
 }
 
 export default function ClimateDashboard() {
+  const [geography, setGeography] = useState<Geography>("ecoregion");
   const [chartSource, setChartSource] = useState<ChartSource>("variable");
   const [variable, setVariable] = useState<Variable>("tas");
   const [climateIndex, setClimateIndex] = useState<ClimateIndex>("trcmax");
   const [season, setSeason] = useState<Season>("annual");
   const [selectedEco, setSelectedEco] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const [enabledScenarios, setEnabledScenarios] = useState<string[]>([...SCENARIOS]);
   const [ecoregions, setEcoregions] = useState<EcoRegion[]>([]);
+  const [metros, setMetros] = useState<string[]>([]);
   const [data, setData] = useState<Partial<Record<Variable, CsvRow[]>>>({});
-  const [indexData, setIndexData] = useState<Partial<Record<ClimateIndex, CsvRow[]>>>({});
+  const [indexData, setIndexData] = useState<Partial<Record<string, CsvRow[]>>>({});
   const [ecoLoading, setEcoLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
   const [showEcoregions, setShowEcoregions] = useState(false);
+  const [showMetros, setShowMetros] = useState(false);
   const [mapView, setMapView] = useState({ center: [45, -100] as [number, number], zoom: 3 });
   const [charts, setCharts] = useState<ChartWindowModel[]>([]);
   const [workspaceActive, setWorkspaceActive] = useState(false);
@@ -287,11 +293,15 @@ export default function ClimateDashboard() {
   }, []);
 
   useEffect(() => {
-    async function loadEcoregions() {
+    async function loadRegions() {
       setEcoLoading(true);
       setError("");
       try {
-        const ecoResult = await loadCsv(["/data/EcoRegionCode.csv"]);
+        const [ecoResult, metroResult] = await Promise.all([
+          loadCsv(["/data/EcoRegionCode.csv"]),
+          loadCsv(["/data/MetroTRC_annual.csv"])
+        ]);
+
         const ecoRows = ecoResult.rows.map((row) => {
           const values = Object.values(row).map(normalize);
           return {
@@ -302,17 +312,27 @@ export default function ClimateDashboard() {
           };
         }).filter((row) => row.code);
 
+        const citySet = new Set<string>();
+        for (const row of metroResult.rows) {
+          const city = normalize(row.City);
+          if (city) citySet.add(city);
+        }
+        const cityRows = Array.from(citySet).sort((a, b) => a.localeCompare(b));
+
         setEcoregions(ecoRows);
-        setSelectedEco(ecoRows[0]?.code ?? "");
+        setMetros(cityRows);
+        setSelectedEco((current) => current || ecoRows[0]?.code || "");
+        setSelectedCity((current) => current || cityRows[0] || "");
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
       } finally {
         setEcoLoading(false);
       }
     }
-    loadEcoregions();
+    loadRegions();
   }, []);
 
+  const selectedRegion = geography === "metro" ? selectedCity : selectedEco;
   const hasCharts = charts.length > 0;
 
   const regionLabels = useMemo(() => {
@@ -364,27 +384,49 @@ export default function ClimateDashboard() {
     setClimateIndex(next);
   }, []);
 
+  const selectGeography = useCallback((next: Geography) => {
+    setGeography(next);
+    if (next === "metro") {
+      setShowMetros(true);
+      setShowEcoregions(false);
+    }
+  }, []);
+
+  const mapOverlayMode = chartSource === "index" && geography === "metro" ? "metro" : "ecoregion";
+  const mapSelectedCode = mapOverlayMode === "metro" ? selectedCity : selectedEco;
+  const mapShowOverlay = mapOverlayMode === "metro" ? showMetros : showEcoregions;
+  const handleMapSelect = useCallback((id: string) => {
+    if (mapOverlayMode === "metro") setSelectedCity(id);
+    else setSelectedEco(id);
+  }, [mapOverlayMode]);
+  const handleShowOverlayChange = useCallback((show: boolean) => {
+    if (mapOverlayMode === "metro") setShowMetros(show);
+    else setShowEcoregions(show);
+  }, [mapOverlayMode]);
+
   const handleGenerate = useCallback(async () => {
     setGenerating(true);
     setError("");
     try {
       const indexChart = chartSource === "index";
+      const region = selectedRegion;
 
       if (indexChart) {
         let nextIndexData = indexData;
-        const csvPath = csvPathForIndex(climateIndex);
-        if (!nextIndexData[climateIndex]?.length) {
+        const csvPath = csvPathForIndex(climateIndex, geography);
+        const cacheKey = `${geography}:${climateIndex}`;
+        if (!nextIndexData[cacheKey]?.length) {
           const result = await loadCsv([csvPath]);
-          const loaded: Partial<Record<ClimateIndex, CsvRow[]>> = { ...nextIndexData };
+          const loaded: Partial<Record<string, CsvRow[]>> = { ...nextIndexData };
           for (const option of INDEX_OPTIONS) {
-            if (option.csv === csvPath) loaded[option.id] = result.rows;
+            if (option.csv[geography] === csvPath) loaded[`${geography}:${option.id}`] = result.rows;
           }
           nextIndexData = loaded;
           setIndexData(loaded);
         }
 
-        const rows = nextIndexData[climateIndex] ?? [];
-        const schemaError = indexSchemaErrorFor(rows, climateIndex, selectedEco);
+        const rows = nextIndexData[cacheKey] ?? [];
+        const schemaError = indexSchemaErrorFor(rows, climateIndex, region, geography);
         if (schemaError) {
           setError(schemaError);
           return;
@@ -392,15 +434,18 @@ export default function ClimateDashboard() {
 
         const traces = buildIndexTraces(rows, {
           index: climateIndex,
-          selectedEco,
+          geography,
+          selectedRegion: region,
           enabledScenarios: [...enabledScenarios]
         });
         if (!traces.length) {
-          setError(`No chart data for ${selectedEco} / ${climateIndex}. Try another region or SSP selection.`);
+          setError(`No chart data for ${region} / ${climateIndex}. Try another region or SSP selection.`);
           return;
         }
 
-        const region = ecoregions.find((item) => item.code === selectedEco);
+        const ecoRegion = geography === "ecoregion"
+          ? ecoregions.find((item) => item.code === region)
+          : undefined;
         const chartIndex = chartCountRef.current;
         chartCountRef.current += 1;
 
@@ -422,9 +467,11 @@ export default function ClimateDashboard() {
           {
             id: `${idBase}-${chartIndex}`,
             title: indexChartTitle(climateIndex),
-            subtitle: region
-              ? `${selectedEco} · ${region.level1} · ${region.level2} · ${region.level3}`
-              : selectedEco,
+            subtitle: ecoRegion
+              ? `${region} · ${ecoRegion.level1} · ${ecoRegion.level2} · ${ecoRegion.level3}`
+              : geography === "metro"
+                ? `Major metro · ${region}`
+                : region,
             metric: { source: "index", id: climateIndex },
             chartKind: "timeseries",
             yAxisLabel: indexYAxisTitle(climateIndex),
@@ -458,14 +505,14 @@ export default function ClimateDashboard() {
       const traces = buildTraces(rows, {
         variable,
         season,
-        selectedEco,
+        selectedEco: region,
         enabledScenarios: [...enabledScenarios]
       });
       if (!traces.length) {
-        setError(`No chart data for ${selectedEco} / ${season} / ${variable}. Try another region or season.`);
+        setError(`No chart data for ${region} / ${season} / ${variable}. Try another region or season.`);
         return;
       }
-      const region = ecoregions.find((item) => item.code === selectedEco);
+      const ecoRegion = ecoregions.find((item) => item.code === region);
       const index = chartCountRef.current;
       chartCountRef.current += 1;
 
@@ -487,9 +534,9 @@ export default function ClimateDashboard() {
         {
           id: `${idBase}-${index}`,
           title: `${season[0].toUpperCase() + season.slice(1)} ${variableTitle(variable)} change`,
-          subtitle: region
-            ? `${selectedEco} · ${region.level1} · ${region.level2} · ${region.level3}`
-            : selectedEco,
+          subtitle: ecoRegion
+            ? `${region} · ${ecoRegion.level1} · ${ecoRegion.level2} · ${ecoRegion.level3}`
+            : region,
           metric: { source: "variable", id: variable },
           chartKind: "quarters",
           traces,
@@ -506,7 +553,7 @@ export default function ClimateDashboard() {
     } finally {
       setGenerating(false);
     }
-  }, [chartSource, climateIndex, data, indexData, variable, season, selectedEco, enabledScenarios, ecoregions, idBase, charts.length]);
+  }, [chartSource, climateIndex, data, geography, indexData, variable, season, selectedRegion, enabledScenarios, ecoregions, idBase, charts.length]);
 
   const closeChart = useCallback((id: string) => {
     setCharts((previous) => previous.filter((chart) => chart.id !== id));
@@ -620,7 +667,7 @@ export default function ClimateDashboard() {
     setMapView({ center: [45, -100], zoom: 3 });
   }, []);
 
-  const canGenerate = !ecoLoading && !!selectedEco && !generating;
+  const canGenerate = !ecoLoading && !!selectedRegion && !generating;
 
   return (
     <main className="shell">
@@ -716,7 +763,10 @@ export default function ClimateDashboard() {
                   type="button"
                   className={chartSource === "variable" ? "active" : undefined}
                   aria-pressed={chartSource === "variable"}
-                  onClick={() => setChartSource("variable")}
+                  onClick={() => {
+                    setChartSource("variable");
+                    setGeography("ecoregion");
+                  }}
                 >
                   Climate variables
                 </button>
@@ -792,43 +842,84 @@ export default function ClimateDashboard() {
             </div>
             ) : null}
 
+            {chartSource === "index" ? (
             <div className="control-group">
               <div className="control-label-row">
-                <label htmlFor="ecoregion">Level III ecoregion</label>
+                <label>Geography</label>
                 <button
                   type="button"
-                  className={`help-icon${helpTopic === "ecoregion" ? " active" : ""}`}
-                  aria-label="Help: Ecoregion"
-                  aria-expanded={helpTopic === "ecoregion"}
+                  className={`help-icon${helpTopic === "region" ? " active" : ""}`}
+                  aria-label="Help: Region"
+                  aria-expanded={helpTopic === "region"}
                   title="Help"
-                  onClick={() => toggleHelp("ecoregion")}
+                  onClick={() => toggleHelp("region")}
                 >
                   ?
                 </button>
               </div>
-              {helpTopic === "ecoregion" ? (
-                <div className="control-help" role="region" aria-label="Ecoregion help">
-                  {CONTROL_HELP.ecoregion.body.map((paragraph) => (
+              {helpTopic === "region" ? (
+                <div className="control-help" role="region" aria-label="Region help">
+                  {CONTROL_HELP.region.body.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
               ) : null}
-              <select
-                id="ecoregion"
-                value={selectedEco}
-                onChange={(event) => setSelectedEco(event.target.value)}
-                disabled={ecoLoading}
-              >
-                {ecoregions.map((region) => (
-                  <option
-                    key={region.code}
-                    value={region.code}
-                    title={`${region.code} · ${region.level1} · ${region.level2} · ${region.level3}`}
-                  >
-                    {region.code} — {region.level3}
-                  </option>
-                ))}
-              </select>
+              <div className="segmented" role="group" aria-label="Geography">
+                <button
+                  type="button"
+                  className={geography === "ecoregion" ? "active" : undefined}
+                  aria-pressed={geography === "ecoregion"}
+                  onClick={() => selectGeography("ecoregion")}
+                >
+                  Ecoregion
+                </button>
+                <button
+                  type="button"
+                  className={geography === "metro" ? "active" : undefined}
+                  aria-pressed={geography === "metro"}
+                  onClick={() => selectGeography("metro")}
+                >
+                  Major metro
+                </button>
+              </div>
+            </div>
+            ) : null}
+
+            <div className="control-group">
+              <div className="control-label-row">
+                <label htmlFor="region-select">
+                  {chartSource === "index" && geography === "metro" ? "Major metro" : "Level III ecoregion"}
+                </label>
+              </div>
+              {chartSource === "index" && geography === "metro" ? (
+                <select
+                  id="region-select"
+                  value={selectedCity}
+                  onChange={(event) => setSelectedCity(event.target.value)}
+                  disabled={ecoLoading}
+                >
+                  {metros.map((city) => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              ) : (
+                <select
+                  id="region-select"
+                  value={selectedEco}
+                  onChange={(event) => setSelectedEco(event.target.value)}
+                  disabled={ecoLoading}
+                >
+                  {ecoregions.map((region) => (
+                    <option
+                      key={region.code}
+                      value={region.code}
+                      title={`${region.code} · ${region.level1} · ${region.level2} · ${region.level3}`}
+                    >
+                      {region.code} — {region.level3}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <div className="control-group">
@@ -873,17 +964,22 @@ export default function ClimateDashboard() {
             {workspaceActive ? (
               <div className="map-card">
                 <EcoRegionMap
-                  selectedCode={selectedEco}
-                  onSelect={setSelectedEco}
-                  showEcoregions={showEcoregions}
-                  onShowEcoregionsChange={setShowEcoregions}
+                  selectedCode={mapSelectedCode}
+                  onSelect={handleMapSelect}
+                  overlayMode={mapOverlayMode}
+                  showOverlay={mapShowOverlay}
+                  onShowOverlayChange={handleShowOverlayChange}
                   view={mapView}
                   onViewChange={setMapView}
                   onExitToInitialView={exitToInitialView}
                   regionLabels={regionLabels}
                   compact
                 />
-                <div className="map-caption">Toggle ecoregions, then click a region to select it</div>
+                <div className="map-caption">
+                  {mapOverlayMode === "metro"
+                    ? "Toggle cities, then click a metro area to select it"
+                    : "Toggle ecoregions, then click a region to select it"}
+                </div>
               </div>
             ) : null}
           </aside>
@@ -901,15 +997,20 @@ export default function ClimateDashboard() {
               <div className="chart-head">
                 <div>
                   <h2>North America</h2>
-                  <p>Street map with major cities. Turn on ecoregions to select a region by clicking.</p>
+                  <p>
+                    {mapOverlayMode === "metro"
+                      ? "Street map with major metro areas. Turn on Cities to select a metro by clicking."
+                      : "Street map with major cities. Turn on ecoregions to select a region by clicking."}
+                  </p>
                 </div>
               </div>
               <div className="map-stage-body">
                 <EcoRegionMap
-                  selectedCode={selectedEco}
-                  onSelect={setSelectedEco}
-                  showEcoregions={showEcoregions}
-                  onShowEcoregionsChange={setShowEcoregions}
+                  selectedCode={mapSelectedCode}
+                  onSelect={handleMapSelect}
+                  overlayMode={mapOverlayMode}
+                  showOverlay={mapShowOverlay}
+                  onShowOverlayChange={handleShowOverlayChange}
                   view={mapView}
                   onViewChange={setMapView}
                   onExitToInitialView={exitToInitialView}

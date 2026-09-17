@@ -1,0 +1,2005 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.1277,
+          19.4285
+        ]
+      },
+      "properties": {
+        "rank": 1,
+        "city": "Ciudad de México",
+        "metro_name": "Ciudad de México",
+        "country": "Mexico",
+        "population": 21436911,
+        "population_year": 2020,
+        "lat": 19.4285,
+        "lon": -99.1277
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.006,
+          40.7143
+        ]
+      },
+      "properties": {
+        "rank": 2,
+        "city": "New York",
+        "metro_name": "New York-Newark-Jersey City, NY-NJ",
+        "country": "United States",
+        "population": 20112448,
+        "population_year": 2025,
+        "lat": 40.7143,
+        "lon": -74.006
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.2437,
+          34.0522
+        ]
+      },
+      "properties": {
+        "rank": 3,
+        "city": "Los Angeles",
+        "metro_name": "Los Angeles-Long Beach-Anaheim, CA",
+        "country": "United States",
+        "population": 12844441,
+        "population_year": 2025,
+        "lat": 34.0522,
+        "lon": -118.2437
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.65,
+          41.85
+        ]
+      },
+      "properties": {
+        "rank": 4,
+        "city": "Chicago",
+        "metro_name": "Chicago-Naperville-Elgin, IL-IN",
+        "country": "United States",
+        "population": 9434123,
+        "population_year": 2025,
+        "lat": 41.85,
+        "lon": -87.65
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -96.8067,
+          32.7831
+        ]
+      },
+      "properties": {
+        "rank": 5,
+        "city": "Dallas",
+        "metro_name": "Dallas-Fort Worth-Arlington, TX",
+        "country": "United States",
+        "population": 8477157,
+        "population_year": 2025,
+        "lat": 32.7831,
+        "lon": -96.8067
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.3633,
+          29.7633
+        ]
+      },
+      "properties": {
+        "rank": 6,
+        "city": "Houston",
+        "metro_name": "Houston-Pasadena-The Woodlands, TX",
+        "country": "United States",
+        "population": 7904627,
+        "population_year": 2025,
+        "lat": 29.7633,
+        "lon": -95.3633
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.3986,
+          43.7064
+        ]
+      },
+      "properties": {
+        "rank": 7,
+        "city": "Toronto",
+        "metro_name": "Toronto (CMA), Ontario",
+        "country": "Canada",
+        "population": 7108874,
+        "population_year": 2025,
+        "lat": 43.7064,
+        "lon": -79.3986
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.388,
+          33.749
+        ]
+      },
+      "properties": {
+        "rank": 8,
+        "city": "Atlanta",
+        "metro_name": "Atlanta-Sandy Springs-Roswell, GA",
+        "country": "United States",
+        "population": 6482182,
+        "population_year": 2025,
+        "lat": 33.749,
+        "lon": -84.388
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.0364,
+          38.8951
+        ]
+      },
+      "properties": {
+        "rank": 9,
+        "city": "Washington",
+        "metro_name": "Washington-Arlington-Alexandria, DC-VA-MD-WV",
+        "country": "United States",
+        "population": 6465724,
+        "population_year": 2025,
+        "lat": 38.8951,
+        "lon": -77.0364
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.1937,
+          25.7743
+        ]
+      },
+      "properties": {
+        "rank": 10,
+        "city": "Miami",
+        "metro_name": "Miami-Fort Lauderdale-West Palm Beach, FL",
+        "country": "United States",
+        "population": 6391072,
+        "population_year": 2025,
+        "lat": 25.7743,
+        "lon": -80.1937
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.1636,
+          39.9524
+        ]
+      },
+      "properties": {
+        "rank": 11,
+        "city": "Philadelphia",
+        "metro_name": "Philadelphia-Camden-Wilmington, PA-NJ-DE-MD",
+        "country": "United States",
+        "population": 6329118,
+        "population_year": 2025,
+        "lat": 39.9524,
+        "lon": -75.1636
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -100.3172,
+          25.6843
+        ]
+      },
+      "properties": {
+        "rank": 12,
+        "city": "Monterrey",
+        "metro_name": "Monterrey",
+        "country": "Mexico",
+        "population": 5322117,
+        "population_year": 2020,
+        "lat": 25.6843,
+        "lon": -100.3172
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -112.074,
+          33.4484
+        ]
+      },
+      "properties": {
+        "rank": 13,
+        "city": "Phoenix",
+        "metro_name": "Phoenix-Mesa-Chandler, AZ",
+        "country": "United States",
+        "population": 5228938,
+        "population_year": 2025,
+        "lat": 33.4484,
+        "lon": -112.074
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -103.3475,
+          20.6774
+        ]
+      },
+      "properties": {
+        "rank": 14,
+        "city": "Guadalajara",
+        "metro_name": "Guadalajara",
+        "country": "Mexico",
+        "population": 5110617,
+        "population_year": 2020,
+        "lat": 20.6774,
+        "lon": -103.3475
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.0598,
+          42.3584
+        ]
+      },
+      "properties": {
+        "rank": 15,
+        "city": "Boston",
+        "metro_name": "Boston-Cambridge-Newton, MA-NH",
+        "country": "United States",
+        "population": 5034221,
+        "population_year": 2025,
+        "lat": 42.3584,
+        "lon": -71.0598
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.3962,
+          33.9534
+        ]
+      },
+      "properties": {
+        "rank": 16,
+        "city": "Riverside",
+        "metro_name": "Riverside-San Bernardino-Ontario, CA",
+        "country": "United States",
+        "population": 4769007,
+        "population_year": 2025,
+        "lat": 33.9534,
+        "lon": -117.3962
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.4194,
+          37.7749
+        ]
+      },
+      "properties": {
+        "rank": 17,
+        "city": "San Francisco",
+        "metro_name": "San Francisco-Oakland-Fremont, CA",
+        "country": "United States",
+        "population": 4630041,
+        "population_year": 2025,
+        "lat": 37.7749,
+        "lon": -122.4194
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5878,
+          45.5088
+        ]
+      },
+      "properties": {
+        "rank": 18,
+        "city": "Montréal",
+        "metro_name": "Montréal (CMA), Quebec",
+        "country": "Canada",
+        "population": 4597837,
+        "population_year": 2025,
+        "lat": 45.5088,
+        "lon": -73.5878
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -83.0457,
+          42.3314
+        ]
+      },
+      "properties": {
+        "rank": 19,
+        "city": "Detroit",
+        "metro_name": "Detroit-Warren-Dearborn, MI",
+        "country": "United States",
+        "population": 4390913,
+        "population_year": 2025,
+        "lat": 42.3314,
+        "lon": -83.0457
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.3321,
+          47.6062
+        ]
+      },
+      "properties": {
+        "rank": 20,
+        "city": "Seattle",
+        "metro_name": "Seattle-Tacoma-Bellevue, WA",
+        "country": "United States",
+        "population": 4161883,
+        "population_year": 2025,
+        "lat": 47.6062,
+        "lon": -122.3321
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -93.2638,
+          44.98
+        ]
+      },
+      "properties": {
+        "rank": 21,
+        "city": "Minneapolis",
+        "metro_name": "Minneapolis-St. Paul-Bloomington, MN-WI",
+        "country": "United States",
+        "population": 3790295,
+        "population_year": 2025,
+        "lat": 44.98,
+        "lon": -93.2638
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.4584,
+          27.9475
+        ]
+      },
+      "properties": {
+        "rank": 22,
+        "city": "Tampa",
+        "metro_name": "Tampa-St. Petersburg-Clearwater, FL",
+        "country": "United States",
+        "population": 3418895,
+        "population_year": 2025,
+        "lat": 27.9475,
+        "lon": -82.4584
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1647,
+          32.7157
+        ]
+      },
+      "properties": {
+        "rank": 23,
+        "city": "San Diego",
+        "metro_name": "San Diego-Chula Vista-Carlsbad, CA",
+        "country": "United States",
+        "population": 3282248,
+        "population_year": 2025,
+        "lat": 32.7157,
+        "lon": -117.1647
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -104.9847,
+          39.7392
+        ]
+      },
+      "properties": {
+        "rank": 24,
+        "city": "Denver",
+        "metro_name": "Denver-Aurora-Centennial, CO",
+        "country": "United States",
+        "population": 3092037,
+        "population_year": 2025,
+        "lat": 39.7392,
+        "lon": -104.9847
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -123.1193,
+          49.2497
+        ]
+      },
+      "properties": {
+        "rank": 25,
+        "city": "Vancouver",
+        "metro_name": "Vancouver (CMA), British Columbia",
+        "country": "Canada",
+        "population": 3088036,
+        "population_year": 2025,
+        "lat": 49.2497,
+        "lon": -123.1193
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -81.3792,
+          28.5383
+        ]
+      },
+      "properties": {
+        "rank": 26,
+        "city": "Orlando",
+        "metro_name": "Orlando-Kissimmee-Sanford, FL",
+        "country": "United States",
+        "population": 2957672,
+        "population_year": 2025,
+        "lat": 28.5383,
+        "lon": -81.3792
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -80.8431,
+          35.2271
+        ]
+      },
+      "properties": {
+        "rank": 27,
+        "city": "Charlotte",
+        "metro_name": "Charlotte-Concord-Gastonia, NC-SC",
+        "country": "United States",
+        "population": 2938830,
+        "population_year": 2025,
+        "lat": 35.2271,
+        "lon": -80.8431
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.6122,
+          39.2904
+        ]
+      },
+      "properties": {
+        "rank": 28,
+        "city": "Baltimore",
+        "metro_name": "Baltimore-Columbia-Towson, MD",
+        "country": "United States",
+        "population": 2857781,
+        "population_year": 2025,
+        "lat": 39.2904,
+        "lon": -76.6122
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.1979,
+          38.6273
+        ]
+      },
+      "properties": {
+        "rank": 29,
+        "city": "St. Louis",
+        "metro_name": "St. Louis, MO-IL",
+        "country": "United States",
+        "population": 2814421,
+        "population_year": 2025,
+        "lat": 38.6273,
+        "lon": -90.1979
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.4936,
+          29.4241
+        ]
+      },
+      "properties": {
+        "rank": 30,
+        "city": "San Antonio",
+        "metro_name": "San Antonio-New Braunfels, TX",
+        "country": "United States",
+        "population": 2813140,
+        "population_year": 2025,
+        "lat": 29.4241,
+        "lon": -98.4936
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.2072,
+          19.0478
+        ]
+      },
+      "properties": {
+        "rank": 31,
+        "city": "Puebla",
+        "metro_name": "Puebla-Tlaxcala",
+        "country": "Mexico",
+        "population": 2776893,
+        "population_year": 2020,
+        "lat": 19.0478,
+        "lon": -98.2072
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.7431,
+          30.2672
+        ]
+      },
+      "properties": {
+        "rank": 32,
+        "city": "Austin",
+        "metro_name": "Austin-Round Rock-San Marcos, TX",
+        "country": "United States",
+        "population": 2620945,
+        "population_year": 2025,
+        "lat": 30.2672,
+        "lon": -97.7431
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.6762,
+          45.5234
+        ]
+      },
+      "properties": {
+        "rank": 33,
+        "city": "Portland",
+        "metro_name": "Portland-Vancouver-Hillsboro, OR-WA",
+        "country": "United States",
+        "population": 2542282,
+        "population_year": 2025,
+        "lat": 45.5234,
+        "lon": -122.6762
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -121.4944,
+          38.5816
+        ]
+      },
+      "properties": {
+        "rank": 34,
+        "city": "Sacramento",
+        "metro_name": "Sacramento-Roseville-Folsom, CA",
+        "country": "United States",
+        "population": 2477274,
+        "population_year": 2025,
+        "lat": 38.5816,
+        "lon": -121.4944
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.9959,
+          40.4406
+        ]
+      },
+      "properties": {
+        "rank": 35,
+        "city": "Pittsburgh",
+        "metro_name": "Pittsburgh, PA",
+        "country": "United States",
+        "population": 2421992,
+        "population_year": 2025,
+        "lat": 40.4406,
+        "lon": -79.9959
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.1372,
+          36.175
+        ]
+      },
+      "properties": {
+        "rank": 36,
+        "city": "Las Vegas",
+        "metro_name": "Las Vegas-Henderson-North Las Vegas, NV",
+        "country": "United States",
+        "population": 2407226,
+        "population_year": 2025,
+        "lat": 36.175,
+        "lon": -115.1372
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.6532,
+          19.2879
+        ]
+      },
+      "properties": {
+        "rank": 37,
+        "city": "Toluca",
+        "metro_name": "Toluca",
+        "country": "Mexico",
+        "population": 2353924,
+        "population_year": 2020,
+        "lat": 19.2879,
+        "lon": -99.6532
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.5144,
+          39.1271
+        ]
+      },
+      "properties": {
+        "rank": 38,
+        "city": "Cincinnati",
+        "metro_name": "Cincinnati, OH-KY-IN",
+        "country": "United States",
+        "population": 2312858,
+        "population_year": 2025,
+        "lat": 39.1271,
+        "lon": -84.5144
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -94.5786,
+          39.0997
+        ]
+      },
+      "properties": {
+        "rank": 39,
+        "city": "Kansas City",
+        "metro_name": "Kansas City, MO-KS",
+        "country": "United States",
+        "population": 2270682,
+        "population_year": 2025,
+        "lat": 39.0997,
+        "lon": -94.5786
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.9988,
+          39.9612
+        ]
+      },
+      "properties": {
+        "rank": 40,
+        "city": "Columbus",
+        "metro_name": "Columbus, OH",
+        "country": "United States",
+        "population": 2242028,
+        "population_year": 2025,
+        "lat": 39.9612,
+        "lon": -82.9988
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.158,
+          39.7684
+        ]
+      },
+      "properties": {
+        "rank": 41,
+        "city": "Indianapolis",
+        "metro_name": "Indianapolis-Carmel-Greenwood, IN",
+        "country": "United States",
+        "population": 2205695,
+        "population_year": 2025,
+        "lat": 39.7684,
+        "lon": -86.158
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.7844,
+          36.1659
+        ]
+      },
+      "properties": {
+        "rank": 42,
+        "city": "Nashville",
+        "metro_name": "Nashville-Davidson--Murfreesboro--Franklin, TN",
+        "country": "United States",
+        "population": 2197416,
+        "population_year": 2025,
+        "lat": 36.1659,
+        "lon": -86.7844
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -81.6954,
+          41.4995
+        ]
+      },
+      "properties": {
+        "rank": 43,
+        "city": "Cleveland",
+        "metro_name": "Cleveland, OH",
+        "country": "United States",
+        "population": 2165775,
+        "population_year": 2025,
+        "lat": 41.4995,
+        "lon": -81.6954
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.0037,
+          32.5027
+        ]
+      },
+      "properties": {
+        "rank": 44,
+        "city": "Tijuana",
+        "metro_name": "Tijuana",
+        "country": "Mexico",
+        "population": 2049413,
+        "population_year": 2020,
+        "lat": 32.5027,
+        "lon": -117.0037
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -121.895,
+          37.3394
+        ]
+      },
+      "properties": {
+        "rank": 45,
+        "city": "San Jose",
+        "metro_name": "San Jose-Sunnyvale-Santa Clara, CA",
+        "country": "United States",
+        "population": 1984473,
+        "population_year": 2025,
+        "lat": 37.3394,
+        "lon": -121.895
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -101.6737,
+          21.1291
+        ]
+      },
+      "properties": {
+        "rank": 46,
+        "city": "León",
+        "metro_name": "León",
+        "country": "Mexico",
+        "population": 1935928,
+        "population_year": 2020,
+        "lat": 21.1291,
+        "lon": -101.6737
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.0853,
+          51.0501
+        ]
+      },
+      "properties": {
+        "rank": 47,
+        "city": "Calgary",
+        "metro_name": "Calgary (CMA), Alberta",
+        "country": "Canada",
+        "population": 1836012,
+        "population_year": 2025,
+        "lat": 51.0501,
+        "lon": -114.0853
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.978,
+          36.8529
+        ]
+      },
+      "properties": {
+        "rank": 48,
+        "city": "Virginia Beach",
+        "metro_name": "Virginia Beach-Chesapeake-Norfolk, VA-NC",
+        "country": "United States",
+        "population": 1797213,
+        "population_year": 2025,
+        "lat": 36.8529,
+        "lon": -75.978
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -81.6556,
+          30.3322
+        ]
+      },
+      "properties": {
+        "rank": 49,
+        "city": "Jacksonville",
+        "metro_name": "Jacksonville, FL",
+        "country": "United States",
+        "population": 1785500,
+        "population_year": 2025,
+        "lat": 30.3322,
+        "lon": -81.6556
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.4128,
+          41.824
+        ]
+      },
+      "properties": {
+        "rank": 50,
+        "city": "Providence",
+        "metro_name": "Providence-Warwick, RI-MA",
+        "country": "United States",
+        "population": 1708161,
+        "population_year": 2025,
+        "lat": 41.824,
+        "lon": -71.4128
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.6981,
+          45.4112
+        ]
+      },
+      "properties": {
+        "rank": 51,
+        "city": "Ottawa",
+        "metro_name": "Ottawa - Gatineau (CMA), Ontario/Quebec",
+        "country": "Canada",
+        "population": 1700014,
+        "population_year": 2025,
+        "lat": 45.4112,
+        "lon": -75.6981
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -113.4687,
+          53.5501
+        ]
+      },
+      "properties": {
+        "rank": 52,
+        "city": "Edmonton",
+        "metro_name": "Edmonton (CMA), Alberta",
+        "country": "Canada",
+        "population": 1692385,
+        "population_year": 2025,
+        "lat": 53.5501,
+        "lon": -113.4687
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -78.6386,
+          35.7721
+        ]
+      },
+      "properties": {
+        "rank": 53,
+        "city": "Raleigh",
+        "metro_name": "Raleigh-Cary, NC",
+        "country": "United States",
+        "population": 1595720,
+        "population_year": 2025,
+        "lat": 35.7721,
+        "lon": -78.6386
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -87.9065,
+          43.0389
+        ]
+      },
+      "properties": {
+        "rank": 54,
+        "city": "Milwaukee",
+        "metro_name": "Milwaukee-Waukesha, WI",
+        "country": "United States",
+        "population": 1575010,
+        "population_year": 2025,
+        "lat": 43.0389,
+        "lon": -87.9065
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -92.7577,
+          15.8375
+        ]
+      },
+      "properties": {
+        "rank": 55,
+        "city": "Querétaro",
+        "metro_name": "Querétaro",
+        "country": "Mexico",
+        "population": 1530820,
+        "population_year": 2020,
+        "lat": 15.8375,
+        "lon": -92.7577
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.5164,
+          35.4676
+        ]
+      },
+      "properties": {
+        "rank": 56,
+        "city": "Oklahoma City",
+        "metro_name": "Oklahoma City, OK",
+        "country": "United States",
+        "population": 1512813,
+        "population_year": 2025,
+        "lat": 35.4676,
+        "lon": -97.5164
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.4608,
+          31.7202
+        ]
+      },
+      "properties": {
+        "rank": 57,
+        "city": "Juárez",
+        "metro_name": "Juárez",
+        "country": "Mexico",
+        "population": 1512450,
+        "population_year": 2020,
+        "lat": 31.7202,
+        "lon": -106.4608
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -85.7594,
+          38.2542
+        ]
+      },
+      "properties": {
+        "rank": 58,
+        "city": "Louisville",
+        "metro_name": "Louisville/Jefferson County, KY-IN",
+        "country": "United States",
+        "population": 1402509,
+        "population_year": 2025,
+        "lat": 38.2542,
+        "lon": -85.7594
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.4603,
+          37.5538
+        ]
+      },
+      "properties": {
+        "rank": 59,
+        "city": "Richmond",
+        "metro_name": "Richmond, VA",
+        "country": "United States",
+        "population": 1389338,
+        "population_year": 2025,
+        "lat": 37.5538,
+        "lon": -77.4603
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -103.419,
+          25.5439
+        ]
+      },
+      "properties": {
+        "rank": 60,
+        "city": "Torreón",
+        "metro_name": "La Laguna",
+        "country": "Mexico",
+        "population": 1375248,
+        "population_year": 2020,
+        "lat": 25.5439,
+        "lon": -103.419
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.049,
+          35.1495
+        ]
+      },
+      "properties": {
+        "rank": 61,
+        "city": "Memphis",
+        "metro_name": "Memphis, TN-MS-AR",
+        "country": "United States",
+        "population": 1341412,
+        "population_year": 2025,
+        "lat": 35.1495,
+        "lon": -90.049
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -89.6232,
+          20.967
+        ]
+      },
+      "properties": {
+        "rank": 62,
+        "city": "Mérida",
+        "metro_name": "Mérida",
+        "country": "Mexico",
+        "population": 1324771,
+        "population_year": 2020,
+        "lat": 20.967,
+        "lon": -89.6232
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -111.8911,
+          40.7608
+        ]
+      },
+      "properties": {
+        "rank": 63,
+        "city": "Salt Lake City",
+        "metro_name": "Salt Lake City-Murray, UT",
+        "country": "United States",
+        "population": 1308377,
+        "population_year": 2025,
+        "lat": 40.7608,
+        "lon": -111.8911
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -100.9714,
+          22.1523
+        ]
+      },
+      "properties": {
+        "rank": 64,
+        "city": "San Luis Potosí",
+        "metro_name": "San Luis Potosí",
+        "country": "Mexico",
+        "population": 1243980,
+        "population_year": 2020,
+        "lat": 22.1523,
+        "lon": -100.9714
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.7724,
+          36.7477
+        ]
+      },
+      "properties": {
+        "rank": 65,
+        "city": "Fresno",
+        "metro_name": "Fresno, CA",
+        "country": "United States",
+        "population": 1203383,
+        "population_year": 2025,
+        "lat": 36.7477,
+        "lon": -119.7724
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8025,
+          33.5207
+        ]
+      },
+      "properties": {
+        "rank": 66,
+        "city": "Birmingham",
+        "metro_name": "Birmingham, AL",
+        "country": "United States",
+        "population": 1197766,
+        "population_year": 2025,
+        "lat": 33.5207,
+        "lon": -86.8025
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -85.6681,
+          42.9634
+        ]
+      },
+      "properties": {
+        "rank": 67,
+        "city": "Grand Rapids",
+        "metro_name": "Grand Rapids-Wyoming-Kentwood, MI",
+        "country": "United States",
+        "population": 1183645,
+        "population_year": 2025,
+        "lat": 42.9634,
+        "lon": -85.6681
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -72.6851,
+          41.7637
+        ]
+      },
+      "properties": {
+        "rank": 68,
+        "city": "Hartford",
+        "metro_name": "Hartford-West Hartford-East Hartford, CT",
+        "country": "United States",
+        "population": 1171426,
+        "population_year": 2025,
+        "lat": 41.7637,
+        "lon": -72.6851
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -78.8784,
+          42.8865
+        ]
+      },
+      "properties": {
+        "rank": 69,
+        "city": "Buffalo",
+        "metro_name": "Buffalo-Cheektowaga, NY",
+        "country": "United States",
+        "population": 1155653,
+        "population_year": 2025,
+        "lat": 42.8865,
+        "lon": -78.8784
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -102.2843,
+          21.8826
+        ]
+      },
+      "properties": {
+        "rank": 70,
+        "city": "Aguascalientes",
+        "metro_name": "Aguascalientes",
+        "country": "Mexico",
+        "population": 1140916,
+        "population_year": 2020,
+        "lat": 21.8826,
+        "lon": -102.2843
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -99.2308,
+          18.9261
+        ]
+      },
+      "properties": {
+        "rank": 71,
+        "city": "Cuernavaca",
+        "metro_name": "Cuernavaca",
+        "country": "Mexico",
+        "population": 1121122,
+        "population_year": 2020,
+        "lat": 18.9261,
+        "lon": -99.2308
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -110.9265,
+          32.2217
+        ]
+      },
+      "properties": {
+        "rank": 72,
+        "city": "Tucson",
+        "metro_name": "Tucson, AZ",
+        "country": "United States",
+        "population": 1074685,
+        "population_year": 2025,
+        "lat": 32.2217,
+        "lon": -110.9265
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.9928,
+          36.154
+        ]
+      },
+      "properties": {
+        "rank": 73,
+        "city": "Tulsa",
+        "metro_name": "Tulsa, OK",
+        "country": "United States",
+        "population": 1069273,
+        "population_year": 2025,
+        "lat": 36.154,
+        "lon": -95.9928
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.6156,
+          43.1548
+        ]
+      },
+      "properties": {
+        "rank": 74,
+        "city": "Rochester",
+        "metro_name": "Rochester, NY",
+        "country": "United States",
+        "population": 1056149,
+        "population_year": 2025,
+        "lat": 43.1548,
+        "lon": -77.6156
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.4545,
+          32.6278
+        ]
+      },
+      "properties": {
+        "rank": 75,
+        "city": "Mexicali",
+        "metro_name": "Mexicali",
+        "country": "Mexico",
+        "population": 1049792,
+        "population_year": 2020,
+        "lat": 32.6278,
+        "lon": -115.4545
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -100.9796,
+          25.426
+        ]
+      },
+      "properties": {
+        "rank": 76,
+        "city": "Saltillo",
+        "metro_name": "Saltillo",
+        "country": "Mexico",
+        "population": 1031779,
+        "population_year": 2020,
+        "lat": 25.426,
+        "lon": -100.9796
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.3663,
+          35.6127
+        ]
+      },
+      "properties": {
+        "rank": 77,
+        "city": "Greenville",
+        "metro_name": "Greenville-Anderson-Greer, SC",
+        "country": "United States",
+        "population": 1014101,
+        "population_year": 2025,
+        "lat": 35.6127,
+        "lon": -77.3663
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -95.9404,
+          41.2563
+        ]
+      },
+      "properties": {
+        "rank": 78,
+        "city": "Omaha",
+        "metro_name": "Omaha, NE-IA",
+        "country": "United States",
+        "population": 1009836,
+        "population_year": 2025,
+        "lat": 41.2563,
+        "lon": -95.9404
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -107.3942,
+          24.8021
+        ]
+      },
+      "properties": {
+        "rank": 79,
+        "city": "Culiacán",
+        "metro_name": "Culiacán",
+        "country": "Mexico",
+        "population": 1003530,
+        "population_year": 2020,
+        "lat": 24.8021,
+        "lon": -107.3942
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -101.1844,
+          19.7008
+        ]
+      },
+      "properties": {
+        "rank": 80,
+        "city": "Morelia",
+        "metro_name": "Morelia",
+        "country": "Mexico",
+        "population": 988704,
+        "population_year": 2020,
+        "lat": 19.7008,
+        "lon": -101.1844
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -157.8583,
+          21.3069
+        ]
+      },
+      "properties": {
+        "rank": 81,
+        "city": "Honolulu",
+        "metro_name": "Urban Honolulu, HI",
+        "country": "United States",
+        "population": 988703,
+        "population_year": 2025,
+        "lat": 21.3069,
+        "lon": -157.8583
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.0889,
+          28.6353
+        ]
+      },
+      "properties": {
+        "rank": 82,
+        "city": "Chihuahua",
+        "metro_name": "Chihuahua",
+        "country": "Mexico",
+        "population": 988065,
+        "population_year": 2020,
+        "lat": 28.6353,
+        "lon": -106.0889
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.1894,
+          41.1792
+        ]
+      },
+      "properties": {
+        "rank": 83,
+        "city": "Bridgeport",
+        "metro_name": "Bridgeport-Stamford-Danbury, CT",
+        "country": "United States",
+        "population": 978179,
+        "population_year": 2025,
+        "lat": 41.1792,
+        "lon": -73.1894
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -90.0751,
+          29.9547
+        ]
+      },
+      "properties": {
+        "rank": 84,
+        "city": "New Orleans",
+        "metro_name": "New Orleans-Metairie, LA",
+        "country": "United States",
+        "population": 970849,
+        "population_year": 2025,
+        "lat": 29.9547,
+        "lon": -90.0751
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -83.9207,
+          35.9606
+        ]
+      },
+      "properties": {
+        "rank": 85,
+        "city": "Knoxville",
+        "metro_name": "Knoxville, TN",
+        "country": "United States",
+        "population": 968137,
+        "population_year": 2025,
+        "lat": 35.9606,
+        "lon": -83.9207
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.147,
+          49.8844
+        ]
+      },
+      "properties": {
+        "rank": 86,
+        "city": "Winnipeg",
+        "metro_name": "Winnipeg (CMA), Manitoba",
+        "country": "Canada",
+        "population": 951758,
+        "population_year": 2025,
+        "lat": 49.8844,
+        "lon": -97.147
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -82.2359,
+          27.0442
+        ]
+      },
+      "properties": {
+        "rank": 87,
+        "city": "North Port",
+        "metro_name": "North Port-Bradenton-Sarasota, FL",
+        "country": "United States",
+        "population": 948158,
+        "population_year": 2025,
+        "lat": 27.0442,
+        "lon": -82.2359
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -110.9668,
+          29.0887
+        ]
+      },
+      "properties": {
+        "rank": 88,
+        "city": "Hermosillo",
+        "metro_name": "Hermosillo",
+        "country": "Mexico",
+        "population": 936263,
+        "population_year": 2020,
+        "lat": 29.0887,
+        "lon": -110.9668
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -86.8466,
+          21.1743
+        ]
+      },
+      "properties": {
+        "rank": 89,
+        "city": "Cancún",
+        "metro_name": "Cancún",
+        "country": "Mexico",
+        "population": 934189,
+        "population_year": 2020,
+        "lat": 21.1743,
+        "lon": -86.8466
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -97.8778,
+          22.2852
+        ]
+      },
+      "properties": {
+        "rank": 90,
+        "city": "Tampico",
+        "metro_name": "Tampico",
+        "country": "Mexico",
+        "population": 927379,
+        "population_year": 2020,
+        "lat": 22.2852,
+        "lon": -97.8778
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.0187,
+          35.3733
+        ]
+      },
+      "properties": {
+        "rank": 91,
+        "city": "Bakersfield",
+        "metro_name": "Bakersfield-Delano, CA",
+        "country": "United States",
+        "population": 927068,
+        "population_year": 2025,
+        "lat": 35.3733,
+        "lon": -119.0187
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6511,
+          35.0845
+        ]
+      },
+      "properties": {
+        "rank": 92,
+        "city": "Albuquerque",
+        "metro_name": "Albuquerque, NM",
+        "country": "United States",
+        "population": 925279,
+        "population_year": 2025,
+        "lat": 35.0845,
+        "lon": -106.6511
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -98.23,
+          26.2034
+        ]
+      },
+      "properties": {
+        "rank": 93,
+        "city": "McAllen",
+        "metro_name": "McAllen-Edinburg-Mission, TX",
+        "country": "United States",
+        "population": 921549,
+        "population_year": 2025,
+        "lat": 26.2034,
+        "lon": -98.23
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7562,
+          42.6526
+        ]
+      },
+      "properties": {
+        "rank": 94,
+        "city": "Albany",
+        "metro_name": "Albany-Schenectady-Troy, NY",
+        "country": "United States",
+        "population": 915835,
+        "population_year": 2025,
+        "lat": 42.6526,
+        "lon": -73.7562
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.2145,
+          46.8123
+        ]
+      },
+      "properties": {
+        "rank": 95,
+        "city": "Québec",
+        "metro_name": "Québec (CMA), Quebec",
+        "country": "Canada",
+        "population": 903607,
+        "population_year": 2025,
+        "lat": 46.8123,
+        "lon": -71.2145
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.9327,
+          32.7763
+        ]
+      },
+      "properties": {
+        "rank": 96,
+        "city": "Charleston",
+        "metro_name": "Charleston-North Charleston, SC",
+        "country": "United States",
+        "population": 889263,
+        "population_year": 2025,
+        "lat": 32.7763,
+        "lon": -79.9327
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -91.1875,
+          30.4433
+        ]
+      },
+      "properties": {
+        "rank": 97,
+        "city": "Baton Rouge",
+        "metro_name": "Baton Rouge, LA",
+        "country": "United States",
+        "population": 888699,
+        "population_year": 2025,
+        "lat": 30.4433,
+        "lon": -91.1875
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -71.8023,
+          42.2626
+        ]
+      },
+      "properties": {
+        "rank": 98,
+        "city": "Worcester",
+        "metro_name": "Worcester, MA",
+        "country": "United States",
+        "population": 888502,
+        "population_year": 2025,
+        "lat": 42.2626,
+        "lon": -71.8023
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.4902,
+          40.6084
+        ]
+      },
+      "properties": {
+        "rank": 99,
+        "city": "Allentown",
+        "metro_name": "Allentown-Bethlehem-Easton, PA-NJ",
+        "country": "United States",
+        "population": 887615,
+        "population_year": 2025,
+        "lat": 40.6084,
+        "lon": -75.4902
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -96.1429,
+          19.1809
+        ]
+      },
+      "properties": {
+        "rank": 100,
+        "city": "Veracruz",
+        "metro_name": "Veracruz",
+        "country": "Mexico",
+        "population": 882011,
+        "population_year": 2020,
+        "lat": 19.1809,
+        "lon": -96.1429
+      }
+    }
+  ]
+}

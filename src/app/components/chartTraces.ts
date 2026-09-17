@@ -4,8 +4,6 @@ export type ChartKind = "quarters" | "timeseries";
 
 export const VARIABLE_OPTIONS = [
   { id: "tas", label: "Mean temperature", csv: "/data/EcoregionAve25yearSpan_tas.csv" },
-  { id: "tasmax", label: "Max temperature", csv: "/data/EcoregionAve25yearSpan_tasmax.csv" },
-  { id: "tasmin", label: "Min temperature", csv: "/data/EcoregionAve25yearSpan_tasmin.csv" },
   { id: "pr", label: "Precipitation", csv: "/data/EcoregionAve25yearSpan_pr.csv" }
 ] as const;
 
@@ -259,10 +257,6 @@ export function variableTitle(variable: Variable): string {
   switch (variable) {
     case "tas":
       return "Mean temperature";
-    case "tasmax":
-      return "Max temperature";
-    case "tasmin":
-      return "Min temperature";
     case "pr":
       return "Precipitation";
   }

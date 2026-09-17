@@ -7,6 +7,8 @@ export type IndexOption = {
   column: string;
   minColumn: string;
   maxColumn: string;
+  minModelColumn: string;
+  maxModelColumn: string;
   csv: string;
   yAxisTitle: string;
   unitLabel: string;
@@ -21,13 +23,13 @@ export const INDEX_OPTIONS = [
     column: "TRCmax",
     minColumn: "TRCmax_min",
     maxColumn: "TRCmax_max",
+    minModelColumn: "TRCmax_min_model",
+    maxModelColumn: "TRCmax_max_model",
     csv: "/data/EcoregionTRC_annual.csv",
     yAxisTitle: "Number of events",
     unitLabel: "events",
     help: [
-      "TRCmax is the number of cycles when maximum temperatures rise above 0°C.",
-      "TRC indices could reflect the frequency of warm spells.",
-      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+      "TRCmax is the number of cycles when maximum temperatures rise above 0°C."
     ]
   },
   {
@@ -37,13 +39,13 @@ export const INDEX_OPTIONS = [
     column: "TRCmaxmin",
     minColumn: "TRCmaxmin_min",
     maxColumn: "TRCmaxmin_max",
+    minModelColumn: "TRCmaxmin_min_model",
+    maxModelColumn: "TRCmaxmin_max_model",
     csv: "/data/EcoregionTRC_annual.csv",
     yAxisTitle: "Number of events",
     unitLabel: "events",
     help: [
-      "TRCmaxmin is the number of days when maximum temperatures are above 0°C and minimum temperatures are below 0°C.",
-      "TRCmaxmin specifically captures the immediate fluctuation of temperature around the freezing point.",
-      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+      "TRCmaxmin is the number of days when maximum temperatures are above 0°C and minimum temperatures are below 0°C."
     ]
   },
   {
@@ -53,13 +55,13 @@ export const INDEX_OPTIONS = [
     column: "CDDMmean",
     minColumn: "CDDMmean_min",
     maxColumn: "CDDMmean_max",
+    minModelColumn: "CDDMmean_min_model",
+    maxModelColumn: "CDDMmean_max_model",
     csv: "/data/EcoregionCDDM_annual.csv",
     yAxisTitle: "Cumulative degree days (°C·days)",
     unitLabel: "°C·days",
     help: [
-      "CDDMmean is Cumulative Degree Days of Melting derived from mean temperature.",
-      "Threshold: −3°C (mean temperature).",
-      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+      "CDDMmean (Cumulative Degree Days of Melting) is derived from mean temperature with a −3°C threshold."
     ]
   },
   {
@@ -69,13 +71,13 @@ export const INDEX_OPTIONS = [
     column: "CDDMmax",
     minColumn: "CDDMmax_min",
     maxColumn: "CDDMmax_max",
+    minModelColumn: "CDDMmax_min_model",
+    maxModelColumn: "CDDMmax_max_model",
     csv: "/data/EcoregionCDDM_annual.csv",
     yAxisTitle: "Cumulative degree days (°C·days)",
     unitLabel: "°C·days",
     help: [
-      "CDDMmax is Cumulative Degree Days of Melting derived from maximum temperature.",
-      "Threshold: 0°C (maximum temperature).",
-      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+      "CDDMmax (Cumulative Degree Days of Melting) is derived from maximum temperature with a 0°C threshold."
     ]
   },
   {
@@ -85,13 +87,13 @@ export const INDEX_OPTIONS = [
     column: "WarmSpell3",
     minColumn: "WarmSpell3_min",
     maxColumn: "WarmSpell3_max",
+    minModelColumn: "WarmSpell3_min_model",
+    maxModelColumn: "WarmSpell3_max_model",
     csv: "/data/EcoregionWarmSpell3_annual.csv",
     yAxisTitle: "Number of events",
     unitLabel: "events",
     help: [
-      "WarmSpell3 (3-day Warm Spell) counts three consecutive days in a warm window.",
-      "Derived from mean temperature with a 0°C threshold.",
-      "Each enabled SSP scenario is plotted as its own line, with a lighter band showing the min–max range."
+      "WarmSpell3 (3-day Warm Spell) counts three consecutive days in a warm window, derived from mean temperature with a 0°C threshold."
     ]
   }
 ] as const satisfies readonly IndexOption[];
@@ -141,15 +143,12 @@ const SCENARIO_BAND_COLORS: Record<string, string> = {
   ssp585: "rgba(217, 76, 76, 0.22)"
 };
 
-function mean(values: number[]): number {
-  if (!values.length) return Number.NaN;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-type YearBucket = {
-  mean: number[];
-  min: number[];
-  max: number[];
+type YearPoint = {
+  mean: number;
+  min: number;
+  max: number;
+  minModel: string;
+  maxModel: string;
 };
 
 function seriesForScenario(
@@ -157,19 +156,22 @@ function seriesForScenario(
   scenario: string,
   option: IndexOption
 ): unknown[] {
-  const byYear = new Map<number, YearBucket>();
+  // CSV is already multi-model aggregated: one row per year with model mean / min / max.
+  const byYear = new Map<number, YearPoint>();
   for (const row of rows) {
     if (normalize(row.Scenario).toLowerCase() !== scenario.toLowerCase()) continue;
     const year = Number(row.Year);
     const value = Number(row[option.column]);
     const minVal = Number(row[option.minColumn]);
     const maxVal = Number(row[option.maxColumn]);
-    if (!Number.isFinite(year)) continue;
-    const bucket = byYear.get(year) ?? { mean: [], min: [], max: [] };
-    if (Number.isFinite(value)) bucket.mean.push(value);
-    if (Number.isFinite(minVal)) bucket.min.push(minVal);
-    if (Number.isFinite(maxVal)) bucket.max.push(maxVal);
-    byYear.set(year, bucket);
+    if (!Number.isFinite(year) || !Number.isFinite(value)) continue;
+    byYear.set(year, {
+      mean: value,
+      min: minVal,
+      max: maxVal,
+      minModel: normalize(row[option.minModelColumn]),
+      maxModel: normalize(row[option.maxModelColumn])
+    });
   }
 
   const years = Array.from(byYear.keys()).sort((a, b) => a - b);
@@ -180,9 +182,9 @@ function seriesForScenario(
   const color = SCENARIO_COLORS[key] ?? "#697d82";
   const bandColor = SCENARIO_BAND_COLORS[key] ?? "rgba(105, 125, 130, 0.2)";
 
-  const meanY = years.map((year) => mean(byYear.get(year)!.mean));
-  const minY = years.map((year) => mean(byYear.get(year)!.min));
-  const maxY = years.map((year) => mean(byYear.get(year)!.max));
+  const meanY = years.map((year) => byYear.get(year)!.mean);
+  const minY = years.map((year) => byYear.get(year)!.min);
+  const maxY = years.map((year) => byYear.get(year)!.max);
   const hasBand = years.some((_, i) => Number.isFinite(minY[i]) && Number.isFinite(maxY[i]));
 
   const traces: unknown[] = [];
@@ -223,8 +225,14 @@ function seriesForScenario(
     x: years,
     y: meanY,
     line: { color, width: 2 },
-    hovertemplate: `${label} ${option.column}<br>Year %{x}: %{y:.2f} ${option.unitLabel}<br>min %{customdata[0]:.2f} · max %{customdata[1]:.2f}<extra></extra>`,
-    customdata: years.map((_, i) => [minY[i], maxY[i]]),
+    hovertemplate:
+      `${label} ${option.column}<br>` +
+      `Year %{x}: %{y:.2f} ${option.unitLabel} (model mean)<br>` +
+      `min %{customdata[0]:.2f} (%{customdata[2]}) · max %{customdata[1]:.2f} (%{customdata[3]})<extra></extra>`,
+    customdata: years.map((year) => {
+      const point = byYear.get(year)!;
+      return [point.min, point.max, point.minModel || "min model", point.maxModel || "max model"];
+    }),
     legendgroup: label
   });
 
@@ -243,7 +251,6 @@ export function indexSchemaErrorFor(
   const headers = Object.keys(rows[0]);
   const required = [
     "Year",
-    "Model",
     "Ecoregion",
     "Scenario",
     option.column,
@@ -278,11 +285,4 @@ export function buildIndexTraces(rows: CsvRow[], snapshot: IndexSnapshot): unkno
 
 export function indexHelpLines(index: ClimateIndex): string[] {
   return [...indexOption(index).help];
-}
-
-export function climateIndexIntroLines(): string[] {
-  return [
-    "Climate indices are derived metrics — numbers you calculate from daily climate data using rules, not raw fields you download directly.",
-    "Pick one index — each generates its own chart with one line per enabled scenario and a lighter min–max band."
-  ];
 }

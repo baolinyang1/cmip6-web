@@ -17,6 +17,7 @@ import {
   normalize,
   schemaErrorFor,
   SCENARIOS,
+  VARIABLE_OPTIONS,
   type CsvRow,
   type Season,
   type Variable,
@@ -24,7 +25,6 @@ import {
 } from "./chartTraces";
 import {
   buildIndexTraces,
-  climateIndexIntroLines,
   csvPathForIndex,
   indexChartTitle,
   indexHelpLines,
@@ -33,8 +33,7 @@ import {
   INDEX_OPTIONS,
   type ClimateIndex
 } from "./indexTraces";
-import IndexTabs from "./IndexTabs";
-import VariableTabs from "./VariableTabs";
+import HelpDropdown from "./HelpDropdown";
 
 const EcoRegionMap = dynamic(() => import("./EcoRegionMap"), {
   ssr: false,
@@ -58,10 +57,10 @@ const COLLAPSED_ROW_GAP = 8;
 /** Top inset inside the stage (toolbar is already in-flow above the stage). */
 const STAGE_TOP = GRID_GAP;
 
-type HelpTopic = "variable" | "index" | "season" | "ecoregion" | "scenarios";
+type HelpTopic = "season" | "ecoregion" | "scenarios";
 type ChartSource = "variable" | "index";
 
-const CONTROL_HELP: Record<Exclude<HelpTopic, "variable" | "index">, { title: string; body: string[] }> = {
+const CONTROL_HELP: Record<HelpTopic, { title: string; body: string[] }> = {
   season: {
     title: "Season",
     body: [
@@ -91,7 +90,7 @@ const CONTROL_HELP: Record<Exclude<HelpTopic, "variable" | "index">, { title: st
 const USER_GUIDE_STEPS = [
   {
     title: "Set your options",
-    body: "In Controls, pick a climate variable or climate index, choose a season for variables, and select SSP scenarios. Tap ? next to a label for more detail."
+    body: "In Controls, choose climate variables or climate indices, then pick the specific metric. For variables, also choose a season. Select SSP scenarios, and tap ? for definitions."
   },
   {
     title: "Choose an ecoregion",
@@ -328,25 +327,40 @@ export default function ClimateDashboard() {
     return map;
   }, [ecoregions]);
 
-  const variableHelp = useMemo(() => [
-    "Climate variables are the raw CMIP6 fields used in this tool — mean, max, and min temperature and precipitation.",
-    "Charts show changes compared with the near-term past baseline, not absolute amounts.",
-    "Mean, max, and min temperature are in degrees Celsius (°C). Precipitation is shown as a percent (%).",
-    "Slide between the tabs to pick the variable before generating a chart."
-  ], []);
+  const variableOptions = useMemo(
+    () =>
+      VARIABLE_OPTIONS.map((option) => ({
+        id: option.id,
+        label: option.label,
+        help:
+          option.id === "pr"
+            ? [
+                "Precipitation is a raw CMIP6 climate variable.",
+                "Charts show percent change (%) compared with the near-term past baseline, not absolute amounts."
+              ]
+            : [
+                "Mean temperature is a raw CMIP6 climate variable.",
+                "Charts show changes compared with the near-term past baseline (°C), not absolute amounts."
+              ]
+      })),
+    []
+  );
 
-  const indexHelp = useMemo(() => [
-    ...climateIndexIntroLines(),
-    ...indexHelpLines(climateIndex)
-  ], [climateIndex]);
+  const indexOptions = useMemo(
+    () =>
+      INDEX_OPTIONS.map((option) => ({
+        id: option.id,
+        label: option.label,
+        help: indexHelpLines(option.id)
+      })),
+    []
+  );
 
   const selectVariable = useCallback((next: Variable) => {
-    setChartSource("variable");
     setVariable(next);
   }, []);
 
   const selectClimateIndex = useCallback((next: ClimateIndex) => {
-    setChartSource("index");
     setClimateIndex(next);
   }, []);
 
@@ -693,53 +707,62 @@ export default function ClimateDashboard() {
               </div>
             ) : null}
 
-            <div className={`control-group control-picker${chartSource === "variable" ? " control-picker-active" : ""}`}>
+            <div className="control-group">
               <div className="control-label-row">
-                <label>Climate variable</label>
+                <label>What do you want to visualize?</label>
+              </div>
+              <div className="segmented" role="group" aria-label="Metric type">
                 <button
                   type="button"
-                  className={`help-icon${helpTopic === "variable" ? " active" : ""}`}
-                  aria-label="Help: Climate variable"
-                  aria-expanded={helpTopic === "variable"}
-                  title="Help"
-                  onClick={() => toggleHelp("variable")}
+                  className={chartSource === "variable" ? "active" : undefined}
+                  aria-pressed={chartSource === "variable"}
+                  onClick={() => setChartSource("variable")}
                 >
-                  ?
+                  Climate variables
+                </button>
+                <button
+                  type="button"
+                  className={chartSource === "index" ? "active" : undefined}
+                  aria-pressed={chartSource === "index"}
+                  onClick={() => setChartSource("index")}
+                >
+                  Climate indices
                 </button>
               </div>
-              {helpTopic === "variable" ? (
-                <div className="control-help" role="region" aria-label="Climate variable help">
-                  {variableHelp.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              ) : null}
-              <VariableTabs value={variable} onChange={selectVariable} />
+              <p className="control-note">
+                {chartSource === "variable"
+                  ? "Climate variables are raw CMIP6 fields — mean temperature and precipitation."
+                  : "Climate indices are derived metrics calculated from daily climate data using rules, not raw fields you download directly."}
+              </p>
             </div>
 
-            <div className={`control-group control-picker${chartSource === "index" ? " control-picker-active" : ""}`}>
-              <div className="control-label-row">
-                <label>Climate indices</label>
-                <button
-                  type="button"
-                  className={`help-icon${helpTopic === "index" ? " active" : ""}`}
-                  aria-label="Help: Climate index"
-                  aria-expanded={helpTopic === "index"}
-                  title="Help"
-                  onClick={() => toggleHelp("index")}
-                >
-                  ?
-                </button>
-              </div>
-              {helpTopic === "index" ? (
-                <div className="control-help" role="region" aria-label="Climate indices help">
-                  {indexHelp.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
+            {chartSource === "variable" ? (
+              <div className="control-group">
+                <div className="control-label-row">
+                  <label htmlFor="climate-variable">Climate variable</label>
                 </div>
-              ) : null}
-              <IndexTabs value={climateIndex} onChange={selectClimateIndex} />
-            </div>
+                <HelpDropdown
+                  id="climate-variable"
+                  options={variableOptions}
+                  value={variable}
+                  onChange={selectVariable}
+                  ariaLabel="Climate variable"
+                />
+              </div>
+            ) : (
+              <div className="control-group">
+                <div className="control-label-row">
+                  <label htmlFor="climate-index">Climate index</label>
+                </div>
+                <HelpDropdown
+                  id="climate-index"
+                  options={indexOptions}
+                  value={climateIndex}
+                  onChange={selectClimateIndex}
+                  ariaLabel="Climate index"
+                />
+              </div>
+            )}
 
             {chartSource === "variable" ? (
             <div className="control-group">

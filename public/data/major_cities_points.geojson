@@ -18,7 +18,10 @@
         "population": 21436911,
         "population_year": 2020,
         "lat": 19.4285,
-        "lon": -99.1277
+        "lon": -99.1277,
+        "radius_km": 44.0,
+        "land_area_km2": 6070.3,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -38,7 +41,10 @@
         "population": 20112448,
         "population_year": 2025,
         "lat": 40.7143,
-        "lon": -74.006
+        "lon": -74.006,
+        "radius_km": 71.1,
+        "land_area_km2": 15901.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -58,7 +64,10 @@
         "population": 12844441,
         "population_year": 2025,
         "lat": 34.0522,
-        "lon": -118.2437
+        "lon": -118.2437,
+        "radius_km": 63.3,
+        "land_area_km2": 12569.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -78,7 +87,10 @@
         "population": 9434123,
         "population_year": 2025,
         "lat": 41.85,
-        "lon": -87.65
+        "lon": -87.65,
+        "radius_km": 75.5,
+        "land_area_km2": 17930.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -98,7 +110,10 @@
         "population": 8477157,
         "population_year": 2025,
         "lat": 32.7831,
-        "lon": -96.8067
+        "lon": -96.8067,
+        "radius_km": 84.6,
+        "land_area_km2": 22470.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -118,7 +133,10 @@
         "population": 7904627,
         "population_year": 2025,
         "lat": 29.7633,
-        "lon": -95.3633
+        "lon": -95.3633,
+        "radius_km": 85.4,
+        "land_area_km2": 22892.0,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -138,7 +156,10 @@
         "population": 7108874,
         "population_year": 2025,
         "lat": 43.7064,
-        "lon": -79.3986
+        "lon": -79.3986,
+        "radius_km": 43.3,
+        "land_area_km2": 5902.7,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -158,7 +179,10 @@
         "population": 6482182,
         "population_year": 2025,
         "lat": 33.749,
-        "lon": -84.388
+        "lon": -84.388,
+        "radius_km": 85.1,
+        "land_area_km2": 22754.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -178,7 +202,10 @@
         "population": 6465724,
         "population_year": 2025,
         "lat": 38.8951,
-        "lon": -77.0364
+        "lon": -77.0364,
+        "radius_km": 70.5,
+        "land_area_km2": 15627.2,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -198,7 +225,10 @@
         "population": 6391072,
         "population_year": 2025,
         "lat": 25.7743,
-        "lon": -80.1937
+        "lon": -80.1937,
+        "radius_km": 64.6,
+        "land_area_km2": 13123.9,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -218,7 +248,10 @@
         "population": 6329118,
         "population_year": 2025,
         "lat": 39.9524,
-        "lon": -75.1636
+        "lon": -75.1636,
+        "radius_km": 61.6,
+        "land_area_km2": 11922.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -238,7 +271,10 @@
         "population": 5322117,
         "population_year": 2020,
         "lat": 25.6843,
-        "lon": -100.3172
+        "lon": -100.3172,
+        "radius_km": 48.7,
+        "land_area_km2": 7440.0,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -258,7 +294,10 @@
         "population": 5228938,
         "population_year": 2025,
         "lat": 33.4484,
-        "lon": -112.074
+        "lon": -112.074,
+        "radius_km": 109.6,
+        "land_area_km2": 37732.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -278,7 +317,10 @@
         "population": 5110617,
         "population_year": 2020,
         "lat": 20.6774,
-        "lon": -103.3475
+        "lon": -103.3475,
+        "radius_km": 28.1,
+        "land_area_km2": 2486.6,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -298,7 +340,10 @@
         "population": 5034221,
         "population_year": 2025,
         "lat": 42.3584,
-        "lon": -71.0598
+        "lon": -71.0598,
+        "radius_km": 53.6,
+        "land_area_km2": 9029.1,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -318,7 +363,10 @@
         "population": 4769007,
         "population_year": 2025,
         "lat": 33.9534,
-        "lon": -117.3962
+        "lon": -117.3962,
+        "radius_km": 150.0,
+        "land_area_km2": 70648.2,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -338,7 +386,10 @@
         "population": 4630041,
         "population_year": 2025,
         "lat": 37.7749,
-        "lon": -122.4194
+        "lon": -122.4194,
+        "radius_km": 45.1,
+        "land_area_km2": 6396.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -358,7 +409,10 @@
         "population": 4597837,
         "population_year": 2025,
         "lat": 45.5088,
-        "lon": -73.5878
+        "lon": -73.5878,
+        "radius_km": 38.6,
+        "land_area_km2": 4670.1,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -378,7 +432,10 @@
         "population": 4390913,
         "population_year": 2025,
         "lat": 42.3314,
-        "lon": -83.0457
+        "lon": -83.0457,
+        "radius_km": 56.6,
+        "land_area_km2": 10081.2,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -398,7 +455,10 @@
         "population": 4161883,
         "population_year": 2025,
         "lat": 47.6062,
-        "lon": -122.3321
+        "lon": -122.3321,
+        "radius_km": 69.6,
+        "land_area_km2": 15203.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -418,7 +478,10 @@
         "population": 3790295,
         "population_year": 2025,
         "lat": 44.98,
-        "lon": -93.2638
+        "lon": -93.2638,
+        "radius_km": 76.2,
+        "land_area_km2": 18253.1,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -438,7 +501,10 @@
         "population": 3418895,
         "population_year": 2025,
         "lat": 27.9475,
-        "lon": -82.4584
+        "lon": -82.4584,
+        "radius_km": 45.5,
+        "land_area_km2": 6516.1,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -458,7 +524,10 @@
         "population": 3282248,
         "population_year": 2025,
         "lat": 32.7157,
-        "lon": -117.1647
+        "lon": -117.1647,
+        "radius_km": 58.9,
+        "land_area_km2": 10905.0,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -478,7 +547,10 @@
         "population": 3092037,
         "population_year": 2025,
         "lat": 39.7392,
-        "lon": -104.9847
+        "lon": -104.9847,
+        "radius_km": 82.9,
+        "land_area_km2": 21612.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -498,7 +570,10 @@
         "population": 3088036,
         "population_year": 2025,
         "lat": 49.2497,
-        "lon": -123.1193
+        "lon": -123.1193,
+        "radius_km": 30.3,
+        "land_area_km2": 2878.9,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -518,7 +593,10 @@
         "population": 2957672,
         "population_year": 2025,
         "lat": 28.5383,
-        "lon": -81.3792
+        "lon": -81.3792,
+        "radius_km": 53.7,
+        "land_area_km2": 9044.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -538,7 +616,10 @@
         "population": 2938830,
         "population_year": 2025,
         "lat": 35.2271,
-        "lon": -80.8431
+        "lon": -80.8431,
+        "radius_km": 67.9,
+        "land_area_km2": 14496.9,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -558,7 +639,10 @@
         "population": 2857781,
         "population_year": 2025,
         "lat": 39.2904,
-        "lon": -76.6122
+        "lon": -76.6122,
+        "radius_km": 46.3,
+        "land_area_km2": 6737.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -578,7 +662,10 @@
         "population": 2814421,
         "population_year": 2025,
         "lat": 38.6273,
-        "lon": -90.1979
+        "lon": -90.1979,
+        "radius_km": 80.5,
+        "land_area_km2": 20366.4,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -598,7 +685,10 @@
         "population": 2813140,
         "population_year": 2025,
         "lat": 29.4241,
-        "lon": -98.4936
+        "lon": -98.4936,
+        "radius_km": 77.6,
+        "land_area_km2": 18941.2,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -618,7 +708,10 @@
         "population": 2776893,
         "population_year": 2020,
         "lat": 19.0478,
-        "lon": -98.2072
+        "lon": -98.2072,
+        "radius_km": 22.8,
+        "land_area_km2": 1628.2,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -638,7 +731,10 @@
         "population": 2620945,
         "population_year": 2025,
         "lat": 30.2672,
-        "lon": -97.7431
+        "lon": -97.7431,
+        "radius_km": 59.0,
+        "land_area_km2": 10929.2,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -658,7 +754,10 @@
         "population": 2542282,
         "population_year": 2025,
         "lat": 45.5234,
-        "lon": -122.6762
+        "lon": -122.6762,
+        "radius_km": 74.3,
+        "land_area_km2": 17320.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -678,7 +777,10 @@
         "population": 2477274,
         "population_year": 2025,
         "lat": 38.5816,
-        "lon": -121.4944
+        "lon": -121.4944,
+        "radius_km": 64.8,
+        "land_area_km2": 13191.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -698,7 +800,10 @@
         "population": 2421992,
         "population_year": 2025,
         "lat": 40.4406,
-        "lon": -79.9959
+        "lon": -79.9959,
+        "radius_km": 68.2,
+        "land_area_km2": 14608.4,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -718,7 +823,10 @@
         "population": 2407226,
         "population_year": 2025,
         "lat": 36.175,
-        "lon": -115.1372
+        "lon": -115.1372,
+        "radius_km": 80.7,
+        "land_area_km2": 20439.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -738,7 +846,10 @@
         "population": 2353924,
         "population_year": 2020,
         "lat": 19.2879,
-        "lon": -99.6532
+        "lon": -99.6532,
+        "radius_km": 27.7,
+        "land_area_km2": 2414.8,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -758,7 +869,10 @@
         "population": 2312858,
         "population_year": 2025,
         "lat": 39.1271,
-        "lon": -84.5144
+        "lon": -84.5144,
+        "radius_km": 60.1,
+        "land_area_km2": 11357.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -778,7 +892,10 @@
         "population": 2270682,
         "population_year": 2025,
         "lat": 39.0997,
-        "lon": -94.5786
+        "lon": -94.5786,
+        "radius_km": 77.3,
+        "land_area_km2": 18794.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -798,7 +915,10 @@
         "population": 2242028,
         "population_year": 2025,
         "lat": 39.9612,
-        "lon": -82.9988
+        "lon": -82.9988,
+        "radius_km": 62.9,
+        "land_area_km2": 12425.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -818,7 +938,10 @@
         "population": 2205695,
         "population_year": 2025,
         "lat": 39.7684,
-        "lon": -86.158
+        "lon": -86.158,
+        "radius_km": 58.0,
+        "land_area_km2": 10582.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -838,7 +961,10 @@
         "population": 2197416,
         "population_year": 2025,
         "lat": 36.1659,
-        "lon": -86.7844
+        "lon": -86.7844,
+        "radius_km": 72.1,
+        "land_area_km2": 16321.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -858,7 +984,10 @@
         "population": 2165775,
         "population_year": 2025,
         "lat": 41.4995,
-        "lon": -81.6954
+        "lon": -81.6954,
+        "radius_km": 47.2,
+        "land_area_km2": 6996.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -878,7 +1007,10 @@
         "population": 2049413,
         "population_year": 2020,
         "lat": 32.5027,
-        "lon": -117.0037
+        "lon": -117.0037,
+        "radius_km": 22.4,
+        "land_area_km2": 1582.1,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -898,7 +1030,10 @@
         "population": 1984473,
         "population_year": 2025,
         "lat": 37.3394,
-        "lon": -121.895
+        "lon": -121.895,
+        "radius_km": 47.0,
+        "land_area_km2": 6940.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -918,7 +1053,10 @@
         "population": 1935928,
         "population_year": 2020,
         "lat": 21.1291,
-        "lon": -101.6737
+        "lon": -101.6737,
+        "radius_km": 24.8,
+        "land_area_km2": 1937.6,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -938,7 +1076,10 @@
         "population": 1836012,
         "population_year": 2025,
         "lat": 51.0501,
-        "lon": -114.0853
+        "lon": -114.0853,
+        "radius_km": 40.3,
+        "land_area_km2": 5098.7,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -958,7 +1099,10 @@
         "population": 1797213,
         "population_year": 2025,
         "lat": 36.8529,
-        "lon": -75.978
+        "lon": -75.978,
+        "radius_km": 51.4,
+        "land_area_km2": 8292.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -978,7 +1122,10 @@
         "population": 1785500,
         "population_year": 2025,
         "lat": 30.3322,
-        "lon": -81.6556
+        "lon": -81.6556,
+        "radius_km": 51.4,
+        "land_area_km2": 8292.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -998,7 +1145,10 @@
         "population": 1708161,
         "population_year": 2025,
         "lat": 41.824,
-        "lon": -71.4128
+        "lon": -71.4128,
+        "radius_km": 36.2,
+        "land_area_km2": 4110.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1018,7 +1168,10 @@
         "population": 1700014,
         "population_year": 2025,
         "lat": 45.4112,
-        "lon": -75.6981
+        "lon": -75.6981,
+        "radius_km": 32.8,
+        "land_area_km2": 3381.8,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -1038,7 +1191,10 @@
         "population": 1692385,
         "population_year": 2025,
         "lat": 53.5501,
-        "lon": -113.4687
+        "lon": -113.4687,
+        "radius_km": 54.7,
+        "land_area_km2": 9416.2,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -1058,7 +1214,10 @@
         "population": 1595720,
         "population_year": 2025,
         "lat": 35.7721,
-        "lon": -78.6386
+        "lon": -78.6386,
+        "radius_km": 41.8,
+        "land_area_km2": 5486.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1078,7 +1237,10 @@
         "population": 1575010,
         "population_year": 2025,
         "lat": 43.0389,
-        "lon": -87.9065
+        "lon": -87.9065,
+        "radius_km": 34.6,
+        "land_area_km2": 3768.0,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1098,7 +1260,10 @@
         "population": 1530820,
         "population_year": 2020,
         "lat": 15.8375,
-        "lon": -92.7577
+        "lon": -92.7577,
+        "radius_km": 25.6,
+        "land_area_km2": 2053.4,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1118,7 +1283,10 @@
         "population": 1512813,
         "population_year": 2025,
         "lat": 35.4676,
-        "lon": -97.5164
+        "lon": -97.5164,
+        "radius_km": 67.4,
+        "land_area_km2": 14275.4,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1138,7 +1306,10 @@
         "population": 1512450,
         "population_year": 2020,
         "lat": 31.7202,
-        "lon": -106.4608
+        "lon": -106.4608,
+        "radius_km": 33.6,
+        "land_area_km2": 3547.5,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1158,7 +1329,10 @@
         "population": 1402509,
         "population_year": 2025,
         "lat": 38.2542,
-        "lon": -85.7594
+        "lon": -85.7594,
+        "radius_km": 57.1,
+        "land_area_km2": 10258.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1178,7 +1352,10 @@
         "population": 1389338,
         "population_year": 2025,
         "lat": 37.5538,
-        "lon": -77.4603
+        "lon": -77.4603,
+        "radius_km": 60.0,
+        "land_area_km2": 11303.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1198,7 +1375,10 @@
         "population": 1375248,
         "population_year": 2020,
         "lat": 25.5439,
-        "lon": -103.419
+        "lon": -103.419,
+        "radius_km": 40.2,
+        "land_area_km2": 5078.9,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1218,7 +1398,10 @@
         "population": 1341412,
         "population_year": 2025,
         "lat": 35.1495,
-        "lon": -90.049
+        "lon": -90.049,
+        "radius_km": 64.0,
+        "land_area_km2": 12878.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1238,7 +1421,10 @@
         "population": 1324771,
         "population_year": 2020,
         "lat": 20.967,
-        "lon": -89.6232
+        "lon": -89.6232,
+        "radius_km": 32.0,
+        "land_area_km2": 3225.2,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1258,7 +1444,10 @@
         "population": 1308377,
         "population_year": 2025,
         "lat": 40.7608,
-        "lon": -111.8911
+        "lon": -111.8911,
+        "radius_km": 80.2,
+        "land_area_km2": 20184.1,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1278,7 +1467,10 @@
         "population": 1243980,
         "population_year": 2020,
         "lat": 22.1523,
-        "lon": -100.9714
+        "lon": -100.9714,
+        "radius_km": 23.9,
+        "land_area_km2": 1787.7,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1298,7 +1490,10 @@
         "population": 1203383,
         "population_year": 2025,
         "lat": 36.7477,
-        "lon": -119.7724
+        "lon": -119.7724,
+        "radius_km": 81.7,
+        "land_area_km2": 20966.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1318,7 +1513,10 @@
         "population": 1197766,
         "population_year": 2025,
         "lat": 33.5207,
-        "lon": -86.8025
+        "lon": -86.8025,
+        "radius_km": 66.0,
+        "land_area_km2": 13674.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1338,7 +1536,10 @@
         "population": 1183645,
         "population_year": 2025,
         "lat": 42.9634,
-        "lon": -85.6681
+        "lon": -85.6681,
+        "radius_km": 51.7,
+        "land_area_km2": 8397.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1358,7 +1559,10 @@
         "population": 1171426,
         "population_year": 2025,
         "lat": 41.7637,
-        "lon": -72.6851
+        "lon": -72.6851,
+        "radius_km": 34.6,
+        "land_area_km2": 3759.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1378,7 +1582,10 @@
         "population": 1155653,
         "population_year": 2025,
         "lat": 42.8865,
-        "lon": -78.8784
+        "lon": -78.8784,
+        "radius_km": 35.9,
+        "land_area_km2": 4053.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1398,7 +1605,10 @@
         "population": 1140916,
         "population_year": 2020,
         "lat": 21.8826,
-        "lon": -102.2843
+        "lon": -102.2843,
+        "radius_km": 24.1,
+        "land_area_km2": 1822.3,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1418,7 +1628,10 @@
         "population": 1121122,
         "population_year": 2020,
         "lat": 18.9261,
-        "lon": -99.2308
+        "lon": -99.2308,
+        "radius_km": 19.9,
+        "land_area_km2": 1244.2,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1438,7 +1651,10 @@
         "population": 1074685,
         "population_year": 2025,
         "lat": 32.2217,
-        "lon": -110.9265
+        "lon": -110.9265,
+        "radius_km": 87.0,
+        "land_area_km2": 23798.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1458,7 +1674,10 @@
         "population": 1069273,
         "population_year": 2025,
         "lat": 36.154,
-        "lon": -95.9928
+        "lon": -95.9928,
+        "radius_km": 71.9,
+        "land_area_km2": 16239.9,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1478,7 +1697,10 @@
         "population": 1056149,
         "population_year": 2025,
         "lat": 43.1548,
-        "lon": -77.6156
+        "lon": -77.6156,
+        "radius_km": 49.1,
+        "land_area_km2": 7582.9,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1498,7 +1720,10 @@
         "population": 1049792,
         "population_year": 2020,
         "lat": 32.6278,
-        "lon": -115.4545
+        "lon": -115.4545,
+        "radius_km": 68.3,
+        "land_area_km2": 14650.3,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1518,7 +1743,10 @@
         "population": 1031779,
         "population_year": 2020,
         "lat": 25.426,
-        "lon": -100.9796
+        "lon": -100.9796,
+        "radius_km": 66.8,
+        "land_area_km2": 14009.3,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1538,7 +1766,10 @@
         "population": 1014101,
         "population_year": 2025,
         "lat": 35.6127,
-        "lon": -77.3663
+        "lon": -77.3663,
+        "radius_km": 47.3,
+        "land_area_km2": 7017.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1558,7 +1789,10 @@
         "population": 1009836,
         "population_year": 2025,
         "lat": 41.2563,
-        "lon": -95.9404
+        "lon": -95.9404,
+        "radius_km": 59.9,
+        "land_area_km2": 11255.2,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1578,7 +1812,10 @@
         "population": 1003530,
         "population_year": 2020,
         "lat": 24.8021,
-        "lon": -107.3942
+        "lon": -107.3942,
+        "radius_km": 44.8,
+        "land_area_km2": 6305.0,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1598,7 +1835,10 @@
         "population": 988704,
         "population_year": 2020,
         "lat": 19.7008,
-        "lon": -101.1844
+        "lon": -101.1844,
+        "radius_km": 23.7,
+        "land_area_km2": 1771.2,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1618,7 +1858,10 @@
         "population": 988703,
         "population_year": 2025,
         "lat": 21.3069,
-        "lon": -157.8583
+        "lon": -157.8583,
+        "radius_km": 22.3,
+        "land_area_km2": 1556.0,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1638,7 +1881,10 @@
         "population": 988065,
         "population_year": 2020,
         "lat": 28.6353,
-        "lon": -106.0889
+        "lon": -106.0889,
+        "radius_km": 75.9,
+        "land_area_km2": 18093.7,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1658,7 +1904,10 @@
         "population": 978179,
         "population_year": 2025,
         "lat": 41.1792,
-        "lon": -73.1894
+        "lon": -73.1894,
+        "radius_km": 23.5,
+        "land_area_km2": 1741.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1678,7 +1927,10 @@
         "population": 970849,
         "population_year": 2025,
         "lat": 29.9547,
-        "lon": -90.0751
+        "lon": -90.0751,
+        "radius_km": 44.1,
+        "land_area_km2": 6108.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1698,7 +1950,10 @@
         "population": 968137,
         "population_year": 2025,
         "lat": 35.9606,
-        "lon": -83.9207
+        "lon": -83.9207,
+        "radius_km": 53.7,
+        "land_area_km2": 9067.4,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1718,7 +1973,10 @@
         "population": 951758,
         "population_year": 2025,
         "lat": 49.8844,
-        "lon": -97.147
+        "lon": -97.147,
+        "radius_km": 41.0,
+        "land_area_km2": 5285.5,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -1738,7 +1996,10 @@
         "population": 948158,
         "population_year": 2025,
         "lat": 27.0442,
-        "lon": -82.2359
+        "lon": -82.2359,
+        "radius_km": 32.7,
+        "land_area_km2": 3363.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1758,7 +2019,10 @@
         "population": 936263,
         "population_year": 2020,
         "lat": 29.0887,
-        "lon": -110.9668
+        "lon": -110.9668,
+        "radius_km": 73.5,
+        "land_area_km2": 16955.2,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1778,7 +2042,10 @@
         "population": 934189,
         "population_year": 2020,
         "lat": 21.1743,
-        "lon": -86.8466
+        "lon": -86.8466,
+        "radius_km": 24.0,
+        "land_area_km2": 1805.5,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1798,7 +2065,10 @@
         "population": 927379,
         "population_year": 2020,
         "lat": 22.2852,
-        "lon": -97.8778
+        "lon": -97.8778,
+        "radius_km": 41.0,
+        "land_area_km2": 5281.7,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
       }
     },
     {
@@ -1818,7 +2088,10 @@
         "population": 927068,
         "population_year": 2025,
         "lat": 35.3733,
-        "lon": -119.0187
+        "lon": -119.0187,
+        "radius_km": 81.9,
+        "land_area_km2": 21068.7,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1838,7 +2111,10 @@
         "population": 925279,
         "population_year": 2025,
         "lat": 35.0845,
-        "lon": -106.6511
+        "lon": -106.6511,
+        "radius_km": 87.5,
+        "land_area_km2": 24043.8,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1858,7 +2134,10 @@
         "population": 921549,
         "population_year": 2025,
         "lat": 26.2034,
-        "lon": -98.23
+        "lon": -98.23,
+        "radius_km": 36.0,
+        "land_area_km2": 4069.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1878,7 +2157,10 @@
         "population": 915835,
         "population_year": 2025,
         "lat": 42.6526,
-        "lon": -73.7562
+        "lon": -73.7562,
+        "radius_km": 48.1,
+        "land_area_km2": 7282.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1898,7 +2180,10 @@
         "population": 903607,
         "population_year": 2025,
         "lat": 46.8123,
-        "lon": -71.2145
+        "lon": -71.2145,
+        "radius_km": 33.4,
+        "land_area_km2": 3499.5,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     },
     {
@@ -1918,7 +2203,10 @@
         "population": 889263,
         "population_year": 2025,
         "lat": 32.7763,
-        "lon": -79.9327
+        "lon": -79.9327,
+        "radius_km": 46.2,
+        "land_area_km2": 6708.5,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1938,7 +2226,10 @@
         "population": 888699,
         "population_year": 2025,
         "lat": 30.4433,
-        "lon": -91.1875
+        "lon": -91.1875,
+        "radius_km": 60.0,
+        "land_area_km2": 11312.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1958,7 +2249,10 @@
         "population": 888502,
         "population_year": 2025,
         "lat": 42.2626,
-        "lon": -71.8023
+        "lon": -71.8023,
+        "radius_km": 35.3,
+        "land_area_km2": 3912.6,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1978,7 +2272,10 @@
         "population": 887615,
         "population_year": 2025,
         "lat": 40.6084,
-        "lon": -75.4902
+        "lon": -75.4902,
+        "radius_km": 34.6,
+        "land_area_km2": 3763.3,
+        "area_source": "US Census 2024 Gazetteer CBSA ALAND"
       }
     },
     {
@@ -1998,7 +2295,79 @@
         "population": 882011,
         "population_year": 2020,
         "lat": 19.1809,
-        "lon": -96.1429
+        "lon": -96.1429,
+        "radius_km": 18.4,
+        "land_area_km2": 1061.9,
+        "area_source": "SEDATU/CONAPO/INEGI superficie_km2 2020"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6689,
+          52.1324
+        ]
+      },
+      "properties": {
+        "rank": 101,
+        "city": "Saskatoon",
+        "metro_name": "Saskatoon (CMA), Saskatchewan",
+        "country": "Canada",
+        "population": 378475,
+        "population_year": 2025,
+        "lat": 52.1324,
+        "lon": -106.6689,
+        "radius_km": 43.2,
+        "land_area_km2": 5864.5,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -104.6178,
+          50.4501
+        ]
+      },
+      "properties": {
+        "rank": 102,
+        "city": "Regina",
+        "metro_name": "Regina (CMA), Saskatchewan",
+        "country": "Canada",
+        "population": 291187,
+        "population_year": 2025,
+        "lat": 50.4501,
+        "lon": -104.6178,
+        "radius_km": 37.1,
+        "land_area_km2": 4323.7,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -81.233,
+          42.9834
+        ]
+      },
+      "properties": {
+        "rank": 103,
+        "city": "London",
+        "metro_name": "London (CMA), Ontario",
+        "country": "Canada",
+        "population": 633002,
+        "population_year": 2025,
+        "lat": 42.9834,
+        "lon": -81.233,
+        "radius_km": 29.1,
+        "land_area_km2": 2661.5,
+        "area_source": "StatCan 2021 CMA boundary LANDAREA (km2)"
       }
     }
   ]

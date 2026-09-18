@@ -367,7 +367,7 @@ export default function EcoRegionMap({
       try {
         if (overlayMode === "metro") {
           const [buffersResponse, pointsResponse] = await Promise.all([
-            fetch("/data/major_cities_buffers_75km.geojson"),
+            fetch("/data/major_cities_buffers.geojson"),
             fetch("/data/major_cities_points.geojson")
           ]);
           if (!buffersResponse.ok) throw new Error(`HTTP ${buffersResponse.status}`);

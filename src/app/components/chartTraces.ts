@@ -2,9 +2,25 @@ export type CsvRow = Record<string, string | number | null | undefined>;
 export type Season = "annual" | "winter" | "spring" | "summer" | "fall";
 export type ChartKind = "quarters" | "timeseries";
 
+export type Geography = "ecoregion" | "metro";
+
 export const VARIABLE_OPTIONS = [
-  { id: "tas", label: "Mean temperature", csv: "/data/EcoregionAve25yearSpan_tas.csv" },
-  { id: "pr", label: "Precipitation", csv: "/data/EcoregionAve25yearSpan_pr.csv" }
+  {
+    id: "tas",
+    label: "Mean temperature",
+    csv: {
+      ecoregion: "/data/EcoregionAve25yearSpan_tas.csv",
+      metro: "/data/MetroAve25yearSpan_tas.csv"
+    }
+  },
+  {
+    id: "pr",
+    label: "Precipitation",
+    csv: {
+      ecoregion: "/data/EcoregionAve25yearSpan_pr.csv",
+      metro: "/data/MetroAve25yearSpan_pr.csv"
+    }
+  }
 ] as const;
 
 export type Variable = (typeof VARIABLE_OPTIONS)[number]["id"];
@@ -12,6 +28,7 @@ export type Variable = (typeof VARIABLE_OPTIONS)[number]["id"];
 export type ChartSnapshot = {
   variable: Variable;
   season: Season;
+  geography: Geography;
   selectedEco: string;
   enabledScenarios: string[];
 };
@@ -114,20 +131,27 @@ export function isTemperatureVariable(variable: Variable): boolean {
   return variable !== "pr";
 }
 
-export function csvPathForVariable(variable: Variable): string {
-  return VARIABLE_OPTIONS.find((option) => option.id === variable)?.csv ?? "";
+export function csvPathForVariable(variable: Variable, geography: Geography = "ecoregion"): string {
+  return VARIABLE_OPTIONS.find((option) => option.id === variable)?.csv[geography] ?? "";
+}
+
+function regionHeader(headers: string[], geography: Geography): string | undefined {
+  return geography === "metro"
+    ? findHeader(headers, ["City", "Metro", "metro_name"])
+    : findHeader(headers, ["Ecoregion", "EcoRegion", "EcoregionCode", "Code"]);
 }
 
 export function schemaErrorFor(
   rows: CsvRow[],
   variable: Variable,
-  season: Season
+  season: Season,
+  geography: Geography = "ecoregion"
 ): string {
   if (!rows.length) {
-    return `Could not load ${variableTitle(variable)} data. Check that ${csvPathForVariable(variable)} is available.`;
+    return `Could not load ${variableTitle(variable)} data. Check that ${csvPathForVariable(variable, geography)} is available.`;
   }
   const headers = Object.keys(rows[0]);
-  const ecoHeader = findHeader(headers, ["Ecoregion", "EcoRegion", "EcoregionCode", "Code"]);
+  const ecoHeader = regionHeader(headers, geography);
   const termHeader = findHeader(headers, ["Term", "Period", "TimePeriod"]);
   const scenarioHeader = findHeader(headers, ["Scenario", "SSP"]);
 
@@ -153,7 +177,7 @@ export function schemaErrorFor(
 
   const metricHeader = valueColumn(headers, variable, season);
   const missing = [
-    !ecoHeader && "ecoregion column",
+    !ecoHeader && (geography === "metro" ? "city column" : "ecoregion column"),
     !termHeader && "term/period column",
     !scenarioHeader && "scenario column",
     !metricHeader && `Plot_index_${season}_${variable} value column`
@@ -167,7 +191,7 @@ export function schemaErrorFor(
 export function buildTraces(rows: CsvRow[], snapshot: ChartSnapshot): unknown[] {
   if (!rows.length) return [];
   const headers = Object.keys(rows[0]);
-  const ecoHeader = findHeader(headers, ["Ecoregion", "EcoRegion", "EcoregionCode", "Code"]);
+  const ecoHeader = regionHeader(headers, snapshot.geography);
   const termHeader = findHeader(headers, ["Term", "Period", "TimePeriod"]);
   const scenarioHeader = findHeader(headers, ["Scenario", "SSP"]);
   const modelHeader = findHeader(headers, ["Model", "GCM", "Source_ID", "Climate_Model"]);

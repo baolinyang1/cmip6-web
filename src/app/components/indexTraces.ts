@@ -1,6 +1,6 @@
-import { normalize, SCENARIOS, type CsvRow } from "./chartTraces";
+import { normalize, SCENARIOS, type CsvRow, type Geography } from "./chartTraces";
 
-export type Geography = "ecoregion" | "metro";
+export type { Geography };
 
 export type IndexOption = {
   id: string;

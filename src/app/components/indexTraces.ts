@@ -219,54 +219,37 @@ function seriesForScenario(
   const label = scenario === "historical" ? "historical" : scenario.toUpperCase();
   const key = scenario.toLowerCase();
   const color = SCENARIO_COLORS[key] ?? "#697d82";
-  const tailColor = withAlpha(color, 0.14);
   const quartileColor = withAlpha(color, 0.4);
   const medianColor = darken(color);
 
   const points = years.map((year) => byYear.get(year)!);
-  const meanY = points.map((point) => point.mean);
-  const minY = points.map((point) => point.min);
-  const maxY = points.map((point) => point.max);
   const p25Y = points.map((point) => point.p25);
   const p50Y = points.map((point) => point.p50);
   const p75Y = points.map((point) => point.p75);
-  const hasTails = points.some((point) => Number.isFinite(point.min) && Number.isFinite(point.max));
   const hasQuartiles = points.some(
     (point) => Number.isFinite(point.p25) && Number.isFinite(point.p75)
   );
   const hasMedian = points.some((point) => Number.isFinite(point.p50));
+  const hover =
+    `${label} ${option.column}<br>` +
+    `Year %{x}<br>` +
+    `median %{customdata[0]:.2f} ${option.unitLabel}<br>` +
+    `p25 %{customdata[1]:.2f} · p75 %{customdata[2]:.2f}<br>` +
+    `mean %{customdata[3]:.2f}<br>` +
+    `min %{customdata[4]:.2f} (%{customdata[6]}) · max %{customdata[5]:.2f} (%{customdata[7]})<extra></extra>`;
+  const customdata = points.map((point) => [
+    point.p50,
+    point.p25,
+    point.p75,
+    point.mean,
+    point.min,
+    point.max,
+    point.minModel || "min model",
+    point.maxModel || "max model"
+  ]);
 
   const hiddenLine = { color: "transparent", width: 0 };
   const traces: unknown[] = [];
-
-  if (hasTails) {
-    traces.push(
-      {
-        type: "scatter",
-        mode: "lines",
-        name: `${label} max`,
-        x: years,
-        y: maxY,
-        line: hiddenLine,
-        hoverinfo: "skip",
-        showlegend: false,
-        legendgroup: label
-      },
-      {
-        type: "scatter",
-        mode: "lines",
-        name: `${label} min–max`,
-        x: years,
-        y: minY,
-        fill: "tonexty",
-        fillcolor: tailColor,
-        line: hiddenLine,
-        hoverinfo: "skip",
-        showlegend: false,
-        legendgroup: label
-      }
-    );
-  }
 
   if (hasQuartiles) {
     traces.push(
@@ -290,7 +273,8 @@ function seriesForScenario(
         fill: "tonexty",
         fillcolor: quartileColor,
         line: hiddenLine,
-        hoverinfo: "skip",
+        hovertemplate: hover,
+        customdata,
         showlegend: false,
         legendgroup: label
       }
@@ -301,41 +285,15 @@ function seriesForScenario(
     traces.push({
       type: "scatter",
       mode: "lines",
-      name: `${label} median`,
+      name: label,
       x: years,
       y: p50Y,
       line: { color: medianColor, width: 2.4 },
-      hovertemplate: `${label} median (p50)<br>Year %{x}: %{y:.2f} ${option.unitLabel}<extra></extra>`,
-      showlegend: false,
+      hovertemplate: hover,
+      customdata,
       legendgroup: label
     });
   }
-
-  traces.push({
-    type: "scatter",
-    mode: "lines",
-    name: label,
-    x: years,
-    y: meanY,
-    line: { color, width: 2 },
-    hovertemplate:
-      `${label} ${option.column}<br>` +
-      `Year %{x}<br>` +
-      `mean %{y:.2f} ${option.unitLabel}<br>` +
-      `median %{customdata[0]:.2f}<br>` +
-      `p25 %{customdata[1]:.2f} · p75 %{customdata[2]:.2f}<br>` +
-      `min %{customdata[3]:.2f} (%{customdata[5]}) · max %{customdata[4]:.2f} (%{customdata[6]})<extra></extra>`,
-    customdata: points.map((point) => [
-      point.p50,
-      point.p25,
-      point.p75,
-      point.min,
-      point.max,
-      point.minModel || "min model",
-      point.maxModel || "max model"
-    ]),
-    legendgroup: label
-  });
 
   return traces;
 }

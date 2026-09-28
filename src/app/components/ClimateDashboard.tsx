@@ -805,14 +805,14 @@ export default function ClimateDashboard() {
             ) : (
               <div className="control-group">
                 <div className="control-label-row">
-                  <label htmlFor="climate-index">Climate index</label>
+                  <label htmlFor="climate-index">Climate indices</label>
                 </div>
                 <HelpDropdown
                   id="climate-index"
                   options={indexOptions}
                   value={climateIndex}
                   onChange={selectClimateIndex}
-                  ariaLabel="Climate index"
+                  ariaLabel="Climate indices"
                 />
               </div>
             )}

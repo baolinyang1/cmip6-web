@@ -273,8 +273,7 @@ function seriesForScenario(
         fill: "tonexty",
         fillcolor: quartileColor,
         line: hiddenLine,
-        hovertemplate: hover,
-        customdata,
+        hoverinfo: "skip",
         showlegend: false,
         legendgroup: label
       }
